@@ -17,7 +17,7 @@
 <dt>公開日:</dt>
 <dd class="date"><span class="published">2013-02-11</span></dd>
 <dt>更新日:</dt>
-<dd class="date"><span class="modified">2013-02-15</span></dd>
+<dd class="date"><span class="modified">2013-03-20</span></dd>
 <dt>翻訳者:</dt>
 <dd class="vcard"><span class="fn n"><span class="given-name">Moto</span> <span class="family-name">Ishizawa</span></span> &lt;<a href="mailto:summerwind.jp+spec@gmail.com" class="email">summerwind.jp@gmail.com</a>&gt;</dd>
 <dt>翻訳協力:</dt>
@@ -328,8 +328,8 @@
 </pre>
 <p>Flags: このフレームに関連するフラグです。有効なフラグは以下の通りです:</p>
 <ul>
-<li>0x01 = FLAG_FIN - このフレーム上に送信される最後のフレームを示し、送信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
-<li>0x02 = FLAG_UNIDIRECTIONAL - このフラグで作成されたストリームは、受信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
+<li>0x01 = FLAG_FIN - このフレームをストリーム上で送信される最後のフレームとし、送信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
+<li>0x02 = FLAG_UNIDIRECTIONAL - このフラグと共に作成されたストリームは、受信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
 </ul>
 <p>Length: フレームの Length フィールド以降のバイト数の長さを示します。SYN_STREAM フレームでは、圧縮された Name/Value ブロックの長さに10バイトが加えた値になります。</p>
 <p>Stream-ID: 31ビットのストリーム識別子です。Stream-ID はこのストリームのフレーム内で使われます。</p>
@@ -363,7 +363,7 @@
 </pre>
 <p>Flags: このフレームに関連するフラグです。有効なフラグは以下の通りです:</p>
 <ul>
-<li>0x01 = FLAG_FIN - このフレーム上に送信される最後のフレームを示し、送信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
+<li>0x01 = FLAG_FIN - このフレームをストリーム上で送信される最後のフレームとし、送信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
 </ul>
 <p>Length: フレームの Length フィールド以降のバイト数の長さを示します。SYN_REPLY フレームでは、圧縮された Name/Value ブロックの長さに4バイトを加えた値になります。</p>
 <p>Stream-ID: 31ビットのストリーム識別子です。</p>
@@ -518,7 +518,7 @@
 </pre>
 <p>Flags: このフレームに関連するフラグです。有効なフラグは以下の通りです:</p>
 <ul>
-<li>0x01 = FLAG_FIN - このフレーム上に送信される最後のフレームを示し、送信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
+<li>0x01 = FLAG_FIN - このフレームをストリーム上で送信される最後のフレームとし、送信者を半切断 (<a href="#section2-3-6">2.3.6節</a>) 状態にします。</li>
 </ul>
 <p>Length: Length フィールド以降のバイト数を表す、符号なし24ビットの値です。Length フィールドの最小の長さは4になります (Name/Value ペアの数が0の場合)。</p>
 <p>Stream-ID: HEADERS ブロックに関連するストリームです。</p>
