@@ -798,7 +798,7 @@
 <p>SPDY は、現在の Web ベースのアプリケーションに可能な限り互換であることを目指しています。これは、サーバーのビジネスロジックやアプリケーション API の観点から、HTTP の機能を変更しないことを意味します。これを達成するために、アプリケーションリクエストやレスポンスヘッダーのセマンティクスは全て保護され、セマンティクスを伝える構文のみが変更されます。したがって、 <a href="http://mbelshe.github.com/SPDY-Specification/draft-mbelshe-spdy-00.xml#RFC2616">RFC2616 の HTTP/1.1 仕様</a>の規則に以下の節の変更を適用します。</p>
 
 <h3 id="section3-1">3.1 接続管理</h3>
-<p>クライアントは、与えられた<a href="http://mbelshe.github.com/SPDY-Specification/draft-mbelshe-spdy-00.xml#RFC6454">オリジン</a>に対して同時に1つ以上の SPDY セッションを開始するべきではありません (SHOULD NOT)。</p>
+<p>クライアントは、与えられた<a href="http://mbelshe.github.com/SPDY-Specification/draft-mbelshe-spdy-00.xml#RFC6454">オリジン</a>に対して同時に2つ以上の SPDY セッションを開始するべきではありません (SHOULD NOT)。</p>
 <p>ある SPDY セッションを開始している間に、別の SPDY セッションを終了しようとしている状態 (例: GOAWAY メッセージが送信されているが、全てのストリームが完了していると限らない状態) は、可能であることに注意してください。</p>
 
 <h4 id="section3-1-1">3.1.1 GOAWAY の使用</h4>
