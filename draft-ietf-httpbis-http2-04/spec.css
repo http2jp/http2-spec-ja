@@ -3,6 +3,7 @@ body {
   padding: 10px 25px;
   font-size: 14px;
   font-family: sans-serif;
+  -webkit-text-size-adjust: 100%;
 }
 
 h2 {
@@ -31,10 +32,6 @@ a:hover {
 
 pre {
   font-family: "Courier New", monospace;
-}
-
-th {
-  text-align: left;
 }
 
 .headernotes {
@@ -91,6 +88,7 @@ th {
 
 .section {
   padding: 10px 0 0;
+  word-wrap: break-word;
 }
 
 .section dl dt {
@@ -111,4 +109,11 @@ th {
 
 .section .note {
   padding-left: 20px;
+}
+
+@media screen and (max-width:320px) {
+  .section pre {
+    padding-left: 0;
+    font-size: 6px;
+  }
 }
