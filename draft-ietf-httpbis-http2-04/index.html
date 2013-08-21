@@ -254,7 +254,7 @@
 <div class="section">
 <h2 id="section3">3. HTTP/2.0 のはじまり</h2>
 <p>HTTP/2.0 は HTTP/1.1 で使用されるのと同じ &quot;http&quot; と &quot;https&quot; の URI スキームを使用します。また、HTTP/2.0 は標準のポート番号も共有します: &quot;http&quot; 用の80番と、&quot;https&quot; 用の443番です。この結果、&quot;http://example.org/foo&quot; や &quot;https://example.com/bar&quot; といった対象リソース URI へのリクエストを処理する実装は、最初にアップストリームサーバー (クライアントが接続を確立しようとしているピア) が HTTP/2.0 に対応するかどうかを認識する必要があります。</p>
-<p>&quot;http&quot; と &quot;https&quot; の URI で異なることを意味します。&quot;https&quot; URI のための認識は<a href="#section3-2">3.2節</a>で説明します。また、&quot;http&quot; URI のための認識は<a href="#section3-3">3.3節</a>で説明します。</p>
+<p>これは HTTP/2.0 への対応を決定する手段が &quot;http&quot; と &quot;https&quot; の URI で異なることを意味します。&quot;https&quot; URI のための認識は<a href="#section3-2">3.2節</a>で説明します。また、&quot;http&quot; URI のための認識は<a href="#section3-3">3.3節</a>で説明します。</p>
 
 <h3 id="section3-1">3.1. HTTP/2.0 のバージョン識別</h3>
 <p>この文書で定義されたプロトコルは、&quot;HTTP/2.0&quot; という文字列を使用して識別します。この識別子は HTTP/1.1 Upgrade ヘッダーフィールドや、TLS application layer protocol negotiation extension <a href="#TLSALPN">[TLSALPN]</a> フィールド、その他プロトコルの識別が必要とされる場所で使用されます。</p>
@@ -290,7 +290,7 @@ Upgrade: HTTP/2.0
 [ HTTP/2.0 connection ...
 </pre>
 <p>サーバーにより送信される最初の HTTP/2.0 フレームは SETTINGS フレーム (<a href="#section6-5">6.5節</a>) です。101 レスポンスを受信すると、クライアントは SETTINGS フレームを含む接続ヘッダー (<a href="#section3-5">3.5節</a>) を送信します。</p>
-<p>アップグレードの前に送信された HTTP/1.1 リクエストはストリーム1に紐付けられ、可能な限り最も高い優先度が割り当てられます。ストリーム1は、リクエストが HTTP/1/1 リクエストとして完了するまで、クライアントからサーバーに対して暗黙的に半切断状態になります。HTTP/2.0 接続が開始された後、ストリーム1はレスポンスのために使用されます。</p>
+<p>アップグレードの前に送信された HTTP/1.1 リクエストはストリーム1に紐付けられ、可能な限り最も高い優先度が割り当てられます。ストリーム1は、リクエストが HTTP/1.1 リクエストとして完了するまで、クライアントからサーバーに対して暗黙的に半切断状態になります。HTTP/2.0 接続が開始された後、ストリーム1はレスポンスのために使用されます。</p>
 
 <h4 id="section3-2-1">3.2.1. HTTP2-Settings ヘッダーフィールド</h4>
 <p>HTTP/1.1 から HTTP/2.0 にアップグレードするクライアントは、"HTTP2-Settings" ヘッダーフィールドを送信しなければなりません (MUST)。"HTTP2-Settings" ヘッダーフィールドは、サーバーがアップグレードリクエストを受け付けることを予想して提供される、HTTP/2.0 接続を制御する設定を含むホップ間のヘッダーフィールドです。このヘッダーが設定されていない場合、サーバーはアップグレードを拒否しなければなりません (MUST)。</p>
