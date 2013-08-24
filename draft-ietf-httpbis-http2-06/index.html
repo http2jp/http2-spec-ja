@@ -195,12 +195,13 @@
 </li>
 <li>付録A. <a href="#changelog">変更点 (公開前に RFC 編集者により削除されます)</a></li>
   <ul>
-    <li>A.1. <a href="#since-draft-ietf-httpbis-http2-04">draft-ietf-httpbis-http2-04 からの変更</a></li>
-    <li>A.2. <a href="#since-draft-ietf-httpbis-http2-03">draft-ietf-httpbis-http2-03 からの変更</a></li>
-    <li>A.3. <a href="#since-draft-ietf-httpbis-http2-02">draft-ietf-httpbis-http2-02 からの変更</a></li>
-    <li>A.4. <a href="#since-draft-ietf-httpbis-http2-01">draft-ietf-httpbis-http2-01 からの変更</a></li>
-    <li>A.5. <a href="#since-draft-ietf-httpbis-http2-00">draft-ietf-httpbis-http2-00 からの変更</a></li>
-    <li>A.6. <a href="#since-draft-mbelshe-httpbis-spdy-00">draft-mbelshe-httpbis-spdy-00 からの変更</a></li>
+    <li>A.1. <a href="#since-draft-ietf-httpbis-http2-05">draft-ietf-httpbis-http2-05 からの変更</a></li>
+    <li>A.2. <a href="#since-draft-ietf-httpbis-http2-04">draft-ietf-httpbis-http2-04 からの変更</a></li>
+    <li>A.3. <a href="#since-draft-ietf-httpbis-http2-03">draft-ietf-httpbis-http2-03 からの変更</a></li>
+    <li>A.4. <a href="#since-draft-ietf-httpbis-http2-02">draft-ietf-httpbis-http2-02 からの変更</a></li>
+    <li>A.5. <a href="#since-draft-ietf-httpbis-http2-01">draft-ietf-httpbis-http2-01 からの変更</a></li>
+    <li>A.6. <a href="#since-draft-ietf-httpbis-http2-00">draft-ietf-httpbis-http2-00 からの変更</a></li>
+    <li>A.7. <a href="#since-draft-mbelshe-httpbis-spdy-00">draft-mbelshe-httpbis-spdy-00 からの変更</a></li>
   </ul>
 </li>
 </ul>
@@ -1007,7 +1008,7 @@ Keep-Alive、Proxy-Connection、TE、Transfer-Encoding、Upgrade。サーバー�
 <p>TLS 1.1 または SNI のいずれかを含まない TLS ハンドシェイクを受信したサーバーは、HTTP/2.0 のネゴシエーションをしてはなりません (MUST NOT)。候補から HTTP/2.0 プロトコルを削除すると、クライアントに提示されるプロトコルのセットから全てのプロトコルが削除が削除される可能性があります。これは、<a href="#TLSALPN">[TLSALPN]</a> の3.2節で述べられるように、プロトコルネゴシエーションの失敗を引き起こします。</p>
 <p>実装には <a href="#RC4">[RC4]</a> のような既知の脆弱性がある TLS 暗号化方式をネゴシエーションで使用しないことを推奨します。</p>
 
-<h3 id="section9-2">9.3. HTTP 向けのフレームサイズ制限</h3>
+<h3 id="section9-3">9.3. HTTP 向けのフレームサイズ制限</h3>
 <p>HTTP メッセージ向けに使用されるフレームは、8 オクテットのフレームヘッダーを除いた長さが 2^14-1 (16,383) オクテットを超えてはいけません (MUST NOT)。エンドポイントは、巨大なフレームの受信に対しては FRAME_TOO_LARGE エラー (<a href="#section4-2">4.2節</a>をご覧ください) として扱わなければなりません (MUST)。</p>
 
 <h3 id="section9-4">9.4. GZip コンテンツエンコーディング</h3>
