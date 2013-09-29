@@ -312,7 +312,7 @@ Upgrade: HTTP/2.0
 <h4 id="section3-2-1">3.2.1. HTTP2-Settings ヘッダーフィールド</h4>
 <p>HTTP/1.1 から HTTP/2.0 にアップグレードするクライアントは、1つの &quot;HTTP2-Settings&quot; ヘッダーフィールドを送信しなければなりません (MUST)。&quot;HTTP2-Settings&quot; ヘッダーフィールドは、HTTP/2.0 接続を制御する設定を含むホップ間で有効なヘッダーフィールドです。このフィールドは、サーバーがアップグレードリクエストを受け付けることを見越して送信されます。このヘッダーが設定されていない場合、サーバーはアップグレードを拒否しなければなりません (MUST)。</p>
 <pre>HTTP2-Settings = token68</pre>
-<p>&quot;HTTP2-Settings&quot; ヘッダーフィールドの内容は、SETTINGS フレーム (<a href="#section6-5">6.5節</a>) のペイロードであり、base64url (これは、最後の '=' を省略した <a href="#RFC4748">[RFC4748]</a> の5章で説明されている URL セーフかつファイル名セーフの Base64 エンコードです) 文字列としてエンコードされます。&quot;token68&quot; の ABNF <a href="#RFC5234">[RFC5234]</a> プロダクションは、<a href="#HTTP-p7">[HTTP-p7]</a> の2.1節に定義されています。</p>
+<p>&quot;HTTP2-Settings&quot; ヘッダーフィールドの内容は、SETTINGS フレーム (<a href="#section6-5">6.5節</a>) のペイロードであり、base64url (これは、最後の '=' を省略した <a href="#RFC4648">[RFC4648]</a> の5章で説明されている URL セーフかつファイル名セーフの Base64 エンコードです) 文字列としてエンコードされます。&quot;token68&quot; の ABNF <a href="#RFC5234">[RFC5234]</a> プロダクションは、<a href="#HTTP-p7">[HTTP-p7]</a> の2.1節に定義されています。</p>
 <p>クライアントは次の設定の値 (<a href="#section6-5-1">6.5.1節</a>) を含めなければなりません (MUST):</p>
 <ul>
 <li>SETTINGS_MAX_CONCURRENT_STREAMS</li>
