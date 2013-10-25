@@ -113,12 +113,13 @@ This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relatin
   14.1. 引用文書
   14.2. 参考文書
 付録A 変更点 (公開前に RFC 編集者により削除されます)
-  A.1. draft-ietf-httpbis-http2-04 からの変更
-  A.2. draft-ietf-httpbis-http2-03 からの変更
-  A.3. draft-ietf-httpbis-http2-02 からの変更
-  A.4. draft-ietf-httpbis-http2-01 からの変更
-  A.5. draft-ietf-httpbis-http2-00 からの変更
-  A.6. draft-mbelshe-httpbis-spdy-00 からの変更
+  A.1. draft-ietf-httpbis-http2-05 からの変更
+  A.2. draft-ietf-httpbis-http2-04 からの変更
+  A.3. draft-ietf-httpbis-http2-03 からの変更
+  A.4. draft-ietf-httpbis-http2-02 からの変更
+  A.5. draft-ietf-httpbis-http2-01 からの変更
+  A.6. draft-ietf-httpbis-http2-00 からの変更
+  A.7. draft-mbelshe-httpbis-spdy-00 からの変更
 
 1. はじめに
 
