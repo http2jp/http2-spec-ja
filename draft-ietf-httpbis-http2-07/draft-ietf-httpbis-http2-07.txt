@@ -1331,7 +1331,7 @@ Specification: この文書 (RFCXXXX)
    | 6      | PING          | ACK(1)                    | Section 6.7  |
    | 7      | GOAWAY        | -                         | Section 6.8  |
    | 9      | WINDOW_UPDATE | -                         | Section 6.9  |
-   | 10     | CONTINUATION  | END_HEADERS(4),           | Section 6.10 |
+   | 10     | CONTINUATION  | END_HEADERS(4)            | Section 6.10 |
    +--------+---------------+---------------------------+--------------+
 
                                 テーブル1
