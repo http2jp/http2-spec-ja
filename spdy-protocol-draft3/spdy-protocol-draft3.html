@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SPDY Protocol - Draft 3 日本語訳</title>
-<link href="spec.css" rel="stylesheet">
+<link href="../common/spec.css" rel="stylesheet">
 </head>
 
 <body>
 <div class="headernotes">
 <p>この文書は「<a href="http://www.chromium.org/spdy/spdy-protocol/spdy-protocol-draft3" hreflang="en">SPDY Protocol - Draft 3</a>」の日本語訳です。</p>
 <p><a href="http://www.chromium.org/spdy/spdy-protocol/spdy-protocol-draft3" hreflang="en">原文の最新版</a> は、この日本語訳が参照した版から更新されている可能性があります。<br>
-この日本語訳は参考情報であり、正式な文書ではないことに注意してください。また、翻訳において生じた誤りが含まれる可能性があるため、必ず原文もあわせて参照することを推奨します。</p> 
+この日本語訳は参考情報であり、正式な文書ではないことに注意してください。また、翻訳において生じた誤りが含まれる可能性があるため、必ず原文もあわせて参照することを推奨します。</p>
 
 <dl class="meta">
 <dt>公開日:</dt>
@@ -825,7 +825,7 @@
     <ul>
     <li>&quot;:host&quot; - このリクエストにおける URL の hostport 部 (<a href="http://mbelshe.github.com/SPDY-Specification/draft-mbelshe-spdy-00.xml#RFC1738">RFC3986</a> を確認してください) です (例 &quot;www.google.com:1234&quot;)。このヘッダーは HTTP の &quot;Host&quot; ヘッダーと同等です</li>
     <li>&quot;:scheme&quot; - このリクエストにおける URL の scheme 部です (例: &quot;https&quot;)</li>
-    </ul>   
+    </ul>
 </li>
 <li>ヘッダー名は全て小文字でなければなりません。</li>
 <li>Connection、Host、Keep-Alive、Proxy-Connection、そして Transfer-Encoding といったヘッダーは無効であり、送信してはいけません(MUST)。</li>
