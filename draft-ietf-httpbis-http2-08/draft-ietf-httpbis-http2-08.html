@@ -603,7 +603,7 @@ Upgrade: HTTP/2.0
 <p>HEADERS フレームは以下のフラグを定義します:</p>
 <dl>
 <dt>END_STREAM (0x1)</dt>
-<dd>ビット1が設定されると、エンドポイントが特定のストリームに送信する最後のヘッダーブロック (<a href="#section4-3">4.3節</a>) であることを示します。このフラグを設定することで、ストリームはいずれかの &qupt;half closed&quot; 状態 (<a href="#section5-1">5.1節</a>) に遷移します。</dd>
+<dd>ビット1が設定されると、エンドポイントが特定のストリームに送信する最後のヘッダーブロック (<a href="#section4-3">4.3節</a>) であることを示します。このフラグを設定することで、ストリームはいずれかの &quot;half closed&quot; 状態 (<a href="#section5-1">5.1節</a>) に遷移します。</dd>
 <dd>CONTINUATION フレームが後に続く HEADERS フレームは、ストリームの終了を知らせる END_STREAM フラグを転送します。CONTINUATION フレームは、ストリームを終了するために使用することはできません。</dd>
 <dt>RESERVED (0x2)</dt>
 <dd>ビット2は将来的な使用のために予約されます。</dd>
