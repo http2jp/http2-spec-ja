@@ -221,7 +221,7 @@
 <p>最後にこのカプセル化は、バイナリメッセージ構造を使用することで、メッセージ処理をよりスケーラブルにすることも可能にします。</p>
 
 <h3 id="section1-1">1.1. この文書の構成</h3>
-<p>HTTP/2.0 の仕様は3つのパートに分割されます: HTTP/2.0 接続がどのように開始されるのかをまとめた HTTP/2.0 のはじまり (<a href="#section3">3章</a>)、様々な種類の独立したフレームにより単一の TCP 接続を多重化するフレーミングレイヤー (<a href="#section4">4章</a>)、そして、フレーミングレイヤーを使用し HTTP のやりとりを表現するための仕組みをまとめた HTTP レイヤー (<a href="#section8">8章</a>) です。フレーミングレイヤーの概念の一部は、HTTP から分離されていますが、汎用的なフレーミングレイヤーを作ることは目標としていません。フレーミングレイヤーは HTTP プロトコルとサーバープッシュの要件にあわせて作られたものです。</p>
+<p>HTTP/2.0 の仕様は3つのパートに分割されます: HTTP/2.0 接続がどのように開始されるのかをまとめた HTTP/2.0 の開始 (<a href="#section3">3章</a>)、様々な種類の独立したフレームにより単一の TCP 接続を多重化するフレーミングレイヤー (<a href="#section4">4章</a>)、そして、フレーミングレイヤーを使用し HTTP のやりとりを表現するための仕組みをまとめた HTTP レイヤー (<a href="#section8">8章</a>) です。フレーミングレイヤーの概念の一部は、HTTP から分離されていますが、汎用的なフレーミングレイヤーを作ることは目標としていません。フレーミングレイヤーは HTTP プロトコルとサーバープッシュの要件にあわせて作られたものです。</p>
 
 <h3 id="section1-2">1.2. 表記と用語</h3>
 <p>この文書のキーワード &quot;MUST&quot;、&quot;MUST NOT&quot;、&quot;REQUIRED&quot;、&quot;SHALL&quot;、&quot;SHALL NOT&quot;、&quot;SHOULD&quot;、&quot;SHOULD NOT&quot;、&quot;RECOMMENDED&quot;、&quot;MAY&quot;、そして &quot;OPTIONAL&quot; は RFC 2119 <a href="#RFC2119">[RFC2119]</a> で記述されたとおりに解釈されるべきです。</p>
@@ -1351,7 +1351,7 @@ Foo: bar                      DATA
 <li>SPDY ドラフト#2 との非互換についての節を削除しました。</li>
 <li>GOAWAY の値が2になっている場合の INTERNAL_ERROR を変更しました &lt;https://groups.google.com/forum/?fromgroups#!topic/spdy-dev/cfUef2gL3iU&gt;。</li>
 <li>概念と導入を置き換えました。</li>
-<li>Upgrade メカニズムを含む HTTP/2.0 のはじまりの節を追加しました。</li>
+<li>Upgrade メカニズムを含む HTTP/2.0 の開始の節を追加しました。</li>
 <li>未使用の参照を削除しました。</li>
 <li>&lt;http://tools.ietf.org/html/draft-montenegro-httpbis-http2-fc-principles-01&gt; に基づくフロー制御の方針 (5.2.1節) を追加しました。</li>
 </ul>
