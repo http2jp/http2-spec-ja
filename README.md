@@ -4,6 +4,7 @@ HTTP/2.0 日本語訳
 HTTP/2.0 日本語訳のリポジトリです。
 現在、以下の日本語訳を含んでいます。
 
+* HTTP/2.0 Draft 10 (テキスト版)
 * HTTP/2.0 Draft 09 (テキスト版 / HTML版)
 * HTTP/2.0 Draft 08 (テキスト版 / HTML版)
 * HTTP/2.0 Draft 07 (テキスト版)
