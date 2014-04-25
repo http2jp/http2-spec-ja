@@ -1,4 +1,4 @@
-Hypertext Transfer Protocol version 2.0
+Hypertext Transfer Protocol version 2
 draft-ietf-httpbis-http2-11
 
 概要
