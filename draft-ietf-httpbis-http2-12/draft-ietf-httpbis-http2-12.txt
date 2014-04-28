@@ -15,7 +15,7 @@ draft-ietf-httpbis-http2-12
 
 この草案における変更点は Appendix A に要約されています。
 
-"h-12" または "h2c-12" として識別される HTTP/2 のこのバージョンは、実装向けとして位置づけられます。相互接続イベントは、2014年6月5日に行われます。詳細は <https://github.com/http2/wg_materials/blob/master/interim-14-06/agenda.md> を参照してください。
+"h2-12" または "h2c-12" として識別される HTTP/2 のこのバージョンは、実装向けとして位置づけられます。相互接続イベントは、2014年6月5日に行われます。詳細は <https://github.com/http2/wg_materials/blob/master/interim-14-06/agenda.md> を参照してください。
 
 このメモの状態
 
