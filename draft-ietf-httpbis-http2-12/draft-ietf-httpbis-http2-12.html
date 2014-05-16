@@ -1366,8 +1366,6 @@ content-type: text/html
 <p>実装上の制限により、これら全ての要件に基づいて TLS ネゴシエーションを fail させることはできないかもしれません。エンドポイントは、最小要件を満たさない TLS セッションによって開始された HTTP/2 コネクションを、INADEQUATE_SECURITY のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) と共に終了しなければなりません (MUST)。</p>
 
 <h3 id="section9-3">9.3. GZip コンテンツエンコーディング</h3>
-<p>クライアントは HTTP レスポンスボディの gzip 圧縮に対応しなければなりません (MUST)。accept-encoding ヘッダーフィールドの値にかかわらず、サーバーは gzip または deflate でエンコードしたレスポンスを送信してもよいものとします (MAY)。圧縮されたレスポンスには、適切な content-encoding ヘッダーフィールドを伴わなければなりません (MUST)。</p>
-
 <p>クライアントは HTTP レスポンスボディの gzip 圧縮に対応しなければなりません (MUST)。accept-encoding ヘッダーフィールドの値にかかわらず、サーバーは gzip でエンコードしたレスポンスを送信してもよいものとします (MAY)。圧縮されたレスポンスには、適切な content-encoding ヘッダーフィールドを伴わなければなりません (MUST)。</p>
 <p>これは事実上、Accept-Encoding ヘッダーフィールド (<a href="#HTTP-p2">[HTTP-p2]</a>、5.3.4節) の値を &quot;identity&quot; から &quot;identity, gzip&quot; へ暗黙的に変更するものですが、&quot;;q=0&quot; を含んでいた場合であっても、gzip エンコードを抑制することはできません。HTTP/2 を HTTP/1.1 に変換する中継者は、Accept-Encoding の値に &quot;gzip&quot; を含むリクエストでなくても、ペイロードを解凍しなければなりません (MUST)。</p>
 </div>
