@@ -1,0 +1,1746 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hypertext Transfer Protocol version 2 (draft-ietf-httpbis-http2-12) 日本語訳</title>
+<link href="../common/spec.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="headernotes">
+<p>この文書は「<a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-12" hreflang="en">Hypertext Transfer Protocol version 2 (draft-ietf-httpbis-http2-12)</a>」の日本語訳です。</p>
+<p><a href="http://tools.ietf.org/html/draft-ietf-httpbis-http2-12" hreflang="en">原文の最新版</a> は、この日本語訳が参照した版から更新されている可能性があります。<br>
+原文はドラフト版であり、HTTP/2 は現在策定中の仕様であることに十分注意してください。<br>
+この日本語訳は参考情報であり、正式な文書ではないことにも注意してください。また、翻訳において生じた誤りが含まれる可能性があるため、必ず原文もあわせて参照することを推奨します。</p>
+
+<dl class="meta">
+<dt>公開日:</dt>
+<dd class="date"><span class="published">2014-04-27</span></dd>
+<dt>更新日:</dt>
+<dd class="date"><span class="modified">2013-05-16</span></dd>
+<dt>翻訳者:</dt>
+<dd class="vcard"><span class="fn n"><span class="given-name">Moto</span> <span class="family-name">Ishizawa</span></span> &lt;<a href="mailto:summerwind.jp+spec@gmail.com" class="email">summerwind.jp@gmail.com</a>&gt;</dd>
+<dt>翻訳協力:</dt>
+<dd class="vcard"><span class="fn n"><span class="given-name">Shigeki</span> <span class="family-name">Ohtsu</span></span></dd>
+</dl>
+</div>
+
+<div id="head">
+<h1>Hypertext Transfer Protocol version 2</h1>
+<p>draft-ietf-httpbis-http2-12</p>
+</div>
+
+<div id="spec">
+<div class="section">
+<h2 id="abstract">概要</h2>
+<p>この仕様書は、最適化された Hypertext Transfer Protocol (HTTP) の構文表現について説明します。HTTP/2 は、ヘッダーフィールドの圧縮を導入し、同一接続上の複数同時メッセージの実現により、ネットワークリソースのより効率的な利用とレイテンシの削減を可能にします。また、サーバーからクライアントへ一方的に送るプッシュ表現についても説明します。</p>
+<p>この文書は HTTP/1.1 のメッセージ構文を変更しますが、これを廃止するわけではありません。HTTP の既存のセマンティクスは変更しません。</p>
+
+<h2 id="editorial-note">編集者ノート (RFC 編集者により今後削除されます)</h2>
+<p>この草案の議論は <a href="http://lists.w3.org/Archives/Public/ietf-http-wg/">http://lists.w3.org/Archives/Public/ietf-http-wg/</a> にアーカイブされる HTTPBIS ワーキンググループのメーリングリスト (ietf-http-wg@w3.org) でおこなわれます。</p>
+<p>ワーキンググループの情報は &lt;<a href="http://tools.ietf.org/wg/httpbis/">http://tools.ietf.org/wg/httpbis/</a>&gt; で、HTTP/2 に関する情報は &lt;<a href="https://github.com/http2/http2-spec">https://github.com/http2/http2-spec</a>&gt; でそれぞれ見つけることができます。</p>
+<p>この草案における変更点は <a href="#changelog">Appendix A</a> に要約されています。</p>
+<p>&quot;h2-12&quot; または &quot;h2c-12&quot; として識別される HTTP/2 のこのバージョンは、実装向けとして位置づけられます。相互接続イベントは、2014年6月5日に行われます。詳細は &lt;<a href="https://github.com/http2/wg_materials/blob/master/interim-14-06/agenda.md">https://github.com/http2/wg_materials/blob/master/interim-14-06/agenda.md</a>&gt; を参照してください。</p>
+
+<h2 id="status">このメモの状態</h2>
+<p>このインターネット草案は BCP 78 と BCP 79 の規定に完全に準拠して提出されます。</p>
+<p>インターネット草案は Internet Engineering Task Force (IETF) の作業文書です。他のグループも作業文書をインターネット草案として配布できることに注意してください。最新のインターネット草案のリストは <a href="http://datatracker.ietf.org/drafts/current/">http://datatracker.ietf.org/drafts/current/</a> にあります。</p>
+<p>インターネット草案は、最長6ヶ月間有効な草案文書であり、いかなる時でも更新や置き換え、他の文書により廃止されることがあります。また、参考資料としてインターネット草案を使用したり、&quot;進行中の作業&quot; としてではなく引用をするのは不適切です。</p>
+<p>このインターネット草案は2014年10月25日に期限切れとなります。</p>
+
+<h2 id="copyright-notice">著作権表示</h2>
+<p>Copyright (c) 2014 IETF Trust and the persons identified as the document authors. All rights reserved.</p>
+<p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (<a href="http://trustee.ietf.org/license-info">http://trustee.ietf.org/license-info</a>) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
+</div>
+
+<div id="toc">
+<h2>目次</h2>
+<ul>
+  <li>1. <a href="#section1">はじめに</a></li>
+  <li>2. <a href="#section2">HTTP/2 プロトコルの概要</a>
+    <ul>
+      <li>2.1. <a href="#section2-1">この文書の構成</a></li>
+      <li>2.2. <a href="#section2-2">表記と用語</a></li>
+    </ul>
+  </li>
+  <li>3. <a href="#section3">HTTP/2 の開始</a>
+    <ul>
+      <li>3.1. <a href="#section3-1">HTTP/2 のバージョン識別</a></li>
+      <li>3.2. <a href="#section3-2">&quot;http&quot; URI での HTTP/2 の開始</a>
+        <ul>
+          <li>3.2.1. <a href="#section3-2-1">HTTP2-Settings ヘッダーフィールド</a></li>
+        </ul>
+      </li>
+      <li>3.3. <a href="#section3-3">&quot;https&quot; URI での HTTP/2 の開始</a></li>
+      <li>3.4. <a href="#section3-4">事前知識による HTTP/2 の開始</a></li>
+      <li>3.5. <a href="#section3-5">HTTP/2 コネクションプリフェイス</a></li>
+    </ul>
+  </li>
+  <li>4. <a href="#section4">HTTP フレーム</a>
+    <ul>
+      <li>4.1. <a href="#section4-1">フレームフォーマット</a></li>
+      <li>4.2. <a href="#section4-2">フレームサイズ</a></li>
+      <li>4.3. <a href="#section4-3">ヘッダーの圧縮と伸張</a></li>
+    </ul>
+  </li>
+  <li>5. <a href="#section5">ストリームと多重化</a>
+    <ul>
+      <li>5.1. <a href="#section5-1">ストリームの状態</a>
+        <ul>
+          <li>5.1.1. <a href="#section5-1-1">ストリームID</a></li>
+          <li>5.1.2. <a href="#section5-1-2">ストリームの並行処理</a></li>
+        </ul>
+      </li>
+      <li>5.2. <a href="#section5-2">フロー制御</a>
+        <ul>
+          <li>5.2.1. <a href="#section5-2-1">フロー制御の原則</a></li>
+          <li>5.2.2. <a href="#section5-2-2">適切なフロー制御の使用</a></li>
+        </ul>
+      </li>
+      <li>5.3. <a href="#section5-3">ストリームの優先度</a>
+        <ul>
+          <li>5.3.1. <a href="#section5-3-1">ストリームの依存関係</a></li>
+          <li>5.3.2. <a href="#section5-3-2">依存関係の重み付け</a></li>
+          <li>5.3.3. <a href="#section5-3-3">再優先度付け</a></li>
+          <li>5.3.4. <a href="#section5-3-4">優先度付けの状態管理</a></li>
+          <li>5.3.5. <a href="#section5-3-5">デフォルト優先度</a></li>
+        </ul>
+      </li>
+      <li>5.4. <a href="#section5-4">エラー処理</a>
+        <ul>
+          <li>5.4.1. <a href="#section5-4-1">コネクションエラー処理</a></li>
+          <li>5.4.2. <a href="#section5-4-2">ストリームエラー処理</a></li>
+          <li>5.4.3. <a href="#section5-4-3">コネクションの終了</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>6. <a href="#section6">フレーム定義</a>
+    <ul>
+      <li>6.1. <a href="#section6-1">DATA</a></li>
+      <li>6.2. <a href="#section6-2">HEADERS</a></li>
+      <li>6.3. <a href="#section6-3">PRIORITY</a></li>
+      <li>6.4. <a href="#section6-4">RST_STREAM</a></li>
+      <li>6.5. <a href="#section6-5">SETTINGS</a>
+        <ul>
+          <li>6.5.1. <a href="#section6-5-1">SETTINGS フォーマット</a></li>
+          <li>6.5.2. <a href="#section6-5-2">定義済みの SETTINGS パラメーター</a></li>
+          <li>6.5.3. <a href="#section6-5-3">設定の同期</a></li>
+        </ul>
+      </li>
+      <li>6.6. <a href="#section6-6">PUSH_PROMISE</a></li>
+      <li>6.7. <a href="#section6-7">PING</a></li>
+      <li>6.8. <a href="#section6-8">GOAWAY</a></li>
+      <li>6.9. <a href="#section6-9">WINDOW_UPDATE</a>
+        <ul>
+          <li>6.9.1. <a href="#section6-9-1">フロー制御ウインドウ</a></li>
+          <li>6.9.2. <a href="#section6-9-2">初期フロー制御ウインドウサイズ</a></li>
+          <li>6.9.3. <a href="#section6-9-3">ストリームウインドウサイズの減少</a></li>
+        </ul>
+      </li>
+      <li>6.10. <a href="#section6-10">CONTINUATION</a></li>
+      <li>6.11. <a href="#section6-11">ALTSVC</a></li>
+      <li>6.12. <a href="#section6-12">BLOCKED</a></li>
+    </ul>
+  </li>
+  <li>7. <a href="#section7">エラーコード</a></li>
+  <li>8. <a href="#section8">HTTP メッセージの交換</a>
+    <ul>
+      <li>8.1. <a href="#section8-1">HTTP リクエスト/レスポンスの交換</a>
+        <ul>
+          <li>8.1.1. <a href="#section8-1-1">情報提供レスポンス</a></li>
+          <li>8.1.2. <a href="#section8-1-2">例</a></li>
+          <li>8.1.3. <a href="#section8-1-3">HTTP ヘッダーフィールド</a></li>
+          <li>8.1.4. <a href="#section8-1-4">HTTP/2 におけるリクエストの信頼性向上メカニズム</a></li>
+        </ul>
+      </li>
+      <li>8.2. <a href="#section8-2">サーバープッシュ</a>
+        <ul>
+          <li>8.2.1. <a href="#section8-2-1">プッシュリクエスト</a></li>
+          <li>8.2.2. <a href="#section8-2-2">プッシュレスポンス</a></li>
+        </ul>
+      </li>
+      <li>8.3. <a href="#section8-3">CONNECT メソッド</a>
+    </ul>
+  <li>
+  <li>9. <a href="#section9">追加の HTTP 要件/検討</a>
+    <ul>
+      <li>9.1. <a href="#section9-1">コネクション管理</a></li>
+      <li>9.2. <a href="#section9-2">TLS の機能の利用</a></li>
+      <li>9.3. <a href="#section9-3">GZip コンテンツエンコーディング</a></li>
+    </ul>
+  </li>
+  <li>10. <a href="#section10">セキュリティへの配慮</a>
+    <ul>
+      <li>10.1. <a href="#section10-1">サーバーの権限</a></li>
+      <li>10.2. <a href="#section10-2">クロスプロトコル攻撃</a></li>
+      <li>10.3. <a href="#section10-3">中継者カプセル化攻撃</a></li>
+      <li>10.4. <a href="#section10-4">プッシュレスポンスのキャッシュ</a></li>
+      <li>10.5. <a href="#section10-5">サービス拒否への考慮</a></li>
+      <li>10.6. <a href="#section10-6">圧縮の使用</a></li>
+      <li>10.7. <a href="#section10-7">パディングの使用</a></li>
+      <li>10.8. <a href="#section10-8">プライバシーへの配慮</a></li>
+    </ul>
+  </li>
+  <li>11. <a href="#section11">IANA への配慮</a>
+    <ul>
+      <li>11.1. <a href="#section11-1">HTTP/2 識別文字列の登録</a></li>
+      <li>11.2. <a href="#section11-2">エラーコードレジストリ</a></li>
+      <li>11.3. <a href="#section11-3">HTTP2-Settings ヘッダーフィールドの登録</a></li>
+      <li>11.4. <a href="#section11-4">RI メソッドの登録</a></li>
+    </ul>
+  </li>
+  <li>12. <a href="#section12">謝辞</a></li>
+  <li>13. <a href="#section13">参考文献</a>
+    <ul>
+      <li>13.1. <a href="#section13-1">引用文書</a></li>
+      <li>13.2. <a href="#section13-2">参考文書</a></li>
+    </ul>
+  </li>
+  <li>付録A. <a href="#changelog">変更点 (公開前に RFC 編集者により削除されます)</a></li>
+    <ul>
+      <li>A.1. <a href="#since-draft-ietf-httpbis-http2-11">draft-ietf-httpbis-http2-11 からの変更</a></li>
+      <li>A.2. <a href="#since-draft-ietf-httpbis-http2-10">draft-ietf-httpbis-http2-10 からの変更</a></li>
+      <li>A.3. <a href="#since-draft-ietf-httpbis-http2-09">draft-ietf-httpbis-http2-09 からの変更</a></li>
+      <li>A.4. <a href="#since-draft-ietf-httpbis-http2-08">draft-ietf-httpbis-http2-08 からの変更</a></li>
+      <li>A.5. <a href="#since-draft-ietf-httpbis-http2-07">draft-ietf-httpbis-http2-07 からの変更</a></li>
+      <li>A.6. <a href="#since-draft-ietf-httpbis-http2-06">draft-ietf-httpbis-http2-06 からの変更</a></li>
+      <li>A.7. <a href="#since-draft-ietf-httpbis-http2-05">draft-ietf-httpbis-http2-05 からの変更</a></li>
+      <li>A.8. <a href="#since-draft-ietf-httpbis-http2-04">draft-ietf-httpbis-http2-04 からの変更</a></li>
+      <li>A.9. <a href="#since-draft-ietf-httpbis-http2-03">draft-ietf-httpbis-http2-03 からの変更</a></li>
+      <li>A.10. <a href="#since-draft-ietf-httpbis-http2-02">draft-ietf-httpbis-http2-02 からの変更</a></li>
+      <li>A.11. <a href="#since-draft-ietf-httpbis-http2-01">draft-ietf-httpbis-http2-01 からの変更</a></li>
+      <li>A.12. <a href="#since-draft-ietf-httpbis-http2-00">draft-ietf-httpbis-http2-00 からの変更</a></li>
+      <li>A.13. <a href="#since-draft-mbelshe-httpbis-spdy-00">draft-mbelshe-httpbis-spdy-00 からの変更</a></li>
+    </ul>
+  </li>
+</ul>
+</div>
+
+<div class="section">
+<h2 id="section1">1. はじめに</h2>
+<p>Hypertext Transfer Protocol (HTTP) は広く成功したプロトコルです。しかしながら、HTTP/1.1 メッセージのフォーマット (<a href="#HTTP-p1">[HTTP-p1]</a>、3章) は、モダンな Web アプリケーションのパフォーマンスよりも、1990年代の手近なツールを使用して実装できるように設計されました。そのため、全体的に今日のアプリケーションのパフォーマンスに悪い影響を与える特性をいくつか持っています。
+</p>
+<p>特に、HTTP/1.0 は与えられた接続に対して、同時に1つのリクエストしか転送できません。HTTP/1.1 パイプラインは、リクエストの並列化に部分的に取り組んだだけで行頭ブロッキングに悩まされています。そのため、多数のリクエストを生成する必要があるクライアントは、レイテンシを減らすために一般的にサーバーに対して複数の接続を使用します。</p>
+<p>さらに、 HTTP/1.1 のヘッダーフィールドはしばしば重複し、冗長です。これよって巨大なネットワークパケットを多数生成することになり、TCP 輻輳の小さな初期ウインドウはすぐいっぱいになってしまいます。そして結果的に、1つの新しい TCP 接続上で複数のリクエストを発行すると、過度の待ち時間が発生することになります。</p>
+<p>この文書では、基礎となる接続に対して HTTP セマンティクスの最適化マッピングを定義することによって、これらの問題に取り組みます。具体的には、同一接続上においてリクエストとレスポンスメッセージを交互に挟み込んだり、HTTP ヘッダーフィールドに対して効率のよい符号化方式を利用したりします。またリクエストの優先度付けも可能にし、より重要なリクエストをより迅速に完了させることで更なる性能向上を実現します。</p>
+<p>もたらされたプロトコルは、 HTTP/1.x と比較して TCP 接続を少なく利用することになるため、よりネットワークフレンドリーな設計となります。これは他のフローとの競合を減らし、接続寿命が長くなることを意味します。そして結果的に、利用可能なネットワークキャパシティの有効利用につながることになります。</p>
+<p>最後にこのカプセル化は、バイナリメッセージ構造を使用することで、メッセージ処理をよりスケーラブルにすることも可能にします。</p>
+</div>
+
+<div class="section">
+<h2 id="section2">2. HTTP/2.0 プロトコルの概要</h2>
+<p>HTTP/2 は HTTP セマンティクスの最適化された転送手段を提供します。HTTP/2 は HTTP/1.1 の主要な機能の全てをサポートしますが、いくつかの方法を用いてより効率的なものを目指します。</p>
+<p>HTTP/2 におけるプロトコルの基本的な単位はフレーム (<a href="#section4-1">4.1節</a>) です。各フレームは異なるタイプと目的を持ちます。例えば、HEADERS と DATA フレームは HTTP リクエストとレスポンス (<a href="#section8-1">8.1節</a>) の基礎を構成します。SETTINGS、WINDOW_UPDATE、PUSH_PROMISE といったその他のフレームタイプは、他の HTTP/2 の機能をサポートするために使われます。
+</p>
+<p>リクエストの多重化は、各 HTTP リクエスト-レスポンスを単一のストリーム (<a href="#section5">5章</a>) に割り当てることで実現します。ストリームは他のストリームとは独立しているため、リクエストのブロックや停止が、他のリクエストの進捗を妨げることはありません。</p>
+<p>フロー制御や優先度付けは、多重化されたストリームを適切に使用できることを保証します。フロー制御 (<a href="#section5-2">5.2節</a>) は、受信者が使用可能なデータのみが送信されることを保証するのに役立ちます。また、優先度付け (<a href="#section5-3">5.3節</a>) は限られたリソースが最初の最も重要なリクエストに割り当てられることを保証します。</p>
+<p>HTTP/2 では、サーバーがクライアントにレスポンスをプッシュすることができる、新しい対話モードを追加されます (<a href="#section8-2">8.2節</a>)。サーバープッシュは、潜在的なレイテンシの増加に対してある程度のネットワーク使用率と引き換えに、サーバーがクライアントが必要とするデータを予測し、クライアントデータの送信を可能にします。サーバーは、PUSH_PROMISE フレームとしてリクエストを合成して送信し、プッシュをおこないます。その後、サーバーは合成したリクエストのレスポンスを別のストリーム上で送信できます。</p>
+<p>HTTP ヘッダーフィールドを含むフレームは圧縮されます (<a href="#section4-3">4.3節</a>)。HTTP リクエストは非常に冗長なため、圧縮によりリクエストとレスポンスのサイズを著しく削減できます。</p>
+<p>HTTP/2 は、ALTSVC フレームタイプ (<a href="#section6-11">6.11節</a>) を使用して、サーバーによりトラフィック制御が可能になる HTTP 代替サービス (<a href="#ALT-SVC">[ALT-SVC]</a>) もサポートします。</p>
+
+<h3 id="section2-1">2.1. この文書の構成</h3>
+<p>HTTP/2 の仕様は4つのパートで構成されます:</p>
+<ul>
+  <li>HTTP/2 の開始 (<a href="#section3">3章</a>) では、どのように HTTP/2 コネクションが開始されるかについて扱います。</p>
+  <li>フレーミングレイヤー (<a href="#section4">4章</a>) とストリームレイヤー (<a href="#section5">5章</a>) では、どのように HTTP/2 フレームを構造化し、多重化ストリームを形成するかを説明します。</li>
+  <li>フレーム (<a href="#section6">6章</a>) と エラー (<a href="#section7">7章</a>) には、HTTP/2 で使用されるフレームやエラーの種類の詳細が含まれます。</li>
+  <li>HTTP マッピング (<a href="#section8">8章</a>) と追加の要件 (<a href="#section9">9章</a>) では、フレームやストリームを使用して HTTP セマンティクスをどのように表現するかを説明します</li>
+</ul>
+<p>フレーミングレイヤーやストリームレイヤーの概念の一部は HTTP から分離されていますが、完全に汎用的なフレーミングレイヤーを定義することを意図してはいません。フレーミングレイヤーとストリームレイヤーは HTTP プロトコルとサーバープッシュの要件にあわせて作られました。</p>
+
+<h3 id="section2-2">2.2. 表記と用語</h3>
+<p>この文書のキーワード &quot;MUST&quot;、&quot;MUST NOT&quot;、&quot;REQUIRED&quot;、&quot;SHALL&quot;、&quot;SHALL NOT&quot;、&quot;SHOULD&quot;、&quot;SHOULD NOT&quot;、&quot;RECOMMENDED&quot;、&quot;MAY&quot;、そして &quot;OPTIONAL&quot; は RFC 2119 <a href="#RFC2119">[RFC2119]</a> で記述されたとおりに解釈されるべきです。</p>
+<p>すべての数値はネットワークバイトオーダーです。特に断りがない限り、値は符号無しとなります。リテラルの値は、必要に応じて10進数または16進数で提供されます。また、16進数リテラルは10進数リテラルと区別するために &quot;0x&quot; ではじまります。</p>
+<p>使用される用語は以下のとおりです:</p>
+<dl>
+  <dt>クライアント<dt>
+  <dd>HTTP/2 接続を開始するエンドポイント。</dd>
+  <dt>コネクション<dt>
+  <dd>2つのエンドポイント間のトランスポート層での接続。</dd>
+  <dt>コネクションエラー</dt>
+  <dd>HTTP/2 接続全体に影響するエラー。</dd>
+  <dt>エンドポイント</dt>
+  <dd>コネクションにおけるクライアントまたはサーバー。</dd>
+  <dt>フレーム</dt>
+  <dd>ヘッダー、フレームタイプに従って構成される可変長のバイト列からなる HTTP/2 接続内部での最小の通信単位。</dd>
+  <dt>中継者</dt>
+  <dd><a href="#HTTP-p1">[HTTP-p1]</a> の2.3節で定義されている "プロキシ" や "ゲートウェイ"、その他の中継者。</dd>
+  <dt>ピア</dt>
+  <dd>エンドポイントの1つ。特定のエンドポイントを議論するときに、"ピア" は議論の対象となる主なリモートエンドポイントを示します。</dd>
+  <dt>受信者</dt>
+  <dd>フレームを受信するエンドポイント。</dd>
+  <dt>送信者</dt>
+  <dd>フレームを送信するエンドポイント。</dd>
+  <dt>サーバー</dt>
+  <dd>HTTP/2 接続を受け付けるエンドポイント。</dd>
+  <dt>ストリーム</dt>
+  <dd>HTTP/2 接続内部の仮想チャンネルを通る双方向のフレームの流れ。</dd>
+  <dt>ストリームエラー</dt>
+  <dd>個々の HTTP/2 ストリームにおけるエラー。</dd>
+</dl>
+</div>
+</div>
+
+<div class="section">
+<h2 id="section3">3. HTTP/2 の開始</h2>
+<p>HTTP/2 接続は TCP 接続の上で動作するアプリケーションレベルのプロトコルです (<a href="#TCP">[TCP]</a>)。また、クライアントが TCP 接続を開始します。</p>
+<p>HTTP/2 は、 HTTP/1.1 で使用されるのと同じ &quot;http&quot; と &quot;https&quot; の URI スキームを使用します。また、HTTP/2 は標準のポート番号も共有します: &quot;http&quot; 用の80番と、&quot;https&quot; 用の443番です。この結果、&quot;http://example.org/foo&quot; や &quot;https://example.com/bar&quot; といった対象リソース URI へのリクエストを処理する実装は、最初にアップストリームサーバー (クライアントがコネクションを確立しようとしているピア) が HTTP/2 に対応するかどうかを認識する必要があります。</p>
+<p>これは HTTP/2 への対応を決定する手段が &quot;http&quot; と &quot;https&quot; の URI で異なることを意味します。&quot;https&quot; URI のための認識は<a href="#section3-2">3.2節</a>で説明します。また、&quot;http&quot; URI のための認識は<a href="#section3-3">3.3節</a>で説明します。</p>
+
+<h3 id="section3-1">3.1. HTTP/2 のバージョン識別</h3>
+<p>この文書で定義されるプロトコルの識別子は2つあります。</p>
+<ul>
+  <li>
+    <p>文字列 &quot;h2&quot; は TLS <a href="#TLS12">[TLS12]</a> を使用する HTTP/2 プロトコルを識別します。この識別子は TLS Application layer protocol negotiation extension <a href="#TLSALPN">[TLSAPLN]</a> フィールドや、TLS 上の HTTP/2 であることが識別されるいかなる場所において使用されます。</p>
+    <p>ALPN プロトコル識別子 (オクテットの列) にシリアライズされる際、HTTP/2 プロトコル識別子の文字列は UTF-8 <a href="#UTF-8">[UTF-8]</a> で符号化されます。</p>
+  </li>
+  <li>
+    <p>文字列 &quot;h2c&quot; は平文の TCP 上での HTTP/2 プロトコルを識別します。 この識別子は HTTP/1.1 Upgrade ヘッダーフィールドや、TCP 上の HTTP/2 であることが識別されるいかなる場所において使用されます。</p>
+  </li>
+</ul>
+<p>&quot;h2&quot; や &quot;h2c&quot; で通信するということは、この文書で説明される伝送方式、セキュリティ、フレーミング、メッセージセマンティクスを使用することを意味します。</p>
+<p>[[anchor3: RFC 編集者注: この文書の最終版を公開する前に、この節の残りの部分は削除してください。]]</p>
+<p>最終的な実装に限り、公開された RFC は自身を &quot;h2&quot; や &quot;h2c&quot; として識別できます。RFC が公開されるまでは、実装はこれらの文字を使用して自身を識別してはいけません (MUST NOT)。</p>
+<p>この文書の文末までの用例や文章では、編集の利便性のために "h2" を使用します。草案版の実装では、この文字列を使用して識別してはいけません (MUST NOT)。</p>
+<p>このプロトコルの草案版の実装は、&quot;-&quot; 文字と識別子として対応する草案番号を追加しなければなりません (MUST)。例えば、TLS 上の draft-ietf-httpbis-http2-11 は &quot;h2-11&quot; という文字列を使用して識別されます。</p>
+<p>これらの草案版に基づく非互換の試験では、&quot;-&quot; 文字と実験名を識別子に追加しなければなりません (MUST)。例えば、draft-ietf-httpbis-http2-09 に基づく Packet mood-based encoding の実装実験では、&quot;h2-09-emo&quot; として自身を識別することになります。ラベルは <a href="#HTTP-p1">[HTTP-p1]</a> の3.2.6節で定義される &quot;token&quot; 構文に従わなければなりません (MUST)。実験をするにあたっては、ietf-http-wg@w3.org メーリングリストで各実験についての調整をすることをお勧めします。</p>
+
+<h3 id="section3-2">3.2. &quot;http&quot; URI での HTTP/2 の開始</h3>
+<p>HTTP/2 への対応に関する事前知識なしに &quot;http:&quot; URI にリクエストをするクライアントは、HTTP Upgrade メカニズムを使用します (<a href="#HTTP-p1">[HTTP-p1]</a> の6.7節)。クライアントは &quot;h2c&quot; トークンを用いて HTTP/2 を指定した Upgrade ヘッダーフィールドを含む HTTP/1.1 リクエストを送信します。また、HTTP/1.1 リクエストには1つの HTTP2-Settings (<a href="#section3-2-1">3.2.1節</a>) ヘッダーフィールドも含まなければなりません (MUST)。</p>
+<p>例:</p>
+<pre>GET /default.htm HTTP/1.1
+Host: server.example.com
+Connection: Upgrade, HTTP2-Settings
+Upgrade: h2c
+HTTP2-Settings: &lt;HTTP/2 SETTINGS ペイロードの base64url エンコード&gt;
+</pre>
+<p>エンティティボディを含むリクエストは、クライアントが HTTP/2 フレームを送信する前に、完全に送信されなければなりません (MUST)。これは、巨大なリクエストエンティティが完全に送信されるまで、そのコネクションの使用を妨げることを意味します。</p>
+<p class="note">最初のリクエストとその後に続くリクエストの並行性が重要な場合は、ラウンドトリップコストを追加で負担しても小さなリクエストを HTTP/2 のアップグレードに利用します。</p>
+<p>HTTP/2 に対応しないサーバーは、リクエストに対して Upgrade ヘッダーフィールドが存在しなかったかのように応答できます。</p>
+<pre>HTTP/1.1 200 OK
+Content-Length: 243
+Content-Type: text/html
+...
+</pre>
+<p>HTTP/2 に対応するサーバーは 101 (Switching Protocols) レスポンスと共に Upgrade を受け入れます。101 レスポンスの終わりを示す空行の後、サーバーは HTTP/2 フレームの送信を開始できます。これらのフレームは Upgrade を開始したリクエストへのレスポンスを含まなければなりません (MUST)。</p>
+<pre>HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: h2c
+
+[ HTTP/2 コネクション ...
+</pre>
+<p>サーバーにより送信される最初の HTTP/2 フレームは、 SETTINGS フレーム (<a href="#section6-5">6.5節</a>) です。101 レスポンスを受信すると、クライアントは SETTINGS フレームを含むコネクションプリフェイス (<a href="#section3-5">3.5節</a>) を送信します。</p>
+<p>アップグレードの前に送信された HTTP/1.1 リクエストには、ストリームID 1が割り当てられ、可能な限りデフォルト優先度の値が割り当てられます。リクエストが HTTP/1.1 リクエストとして完了しているため、ストリーム 1 はクライアントからサーバーに対して暗黙的に half closed 状態になります。HTTP/2 接続を開始した後、ストリーム 1はレスポンスのために使用されます。</p>
+
+<h4 id="section3-2-1">3.2.1. HTTP2-Settings ヘッダーフィールド</h4>
+<p>HTTP/1.1 から HTTP/2 にアップグレードするリクエストは、1つの &lt;HTTP2-Settings&lt; ヘッダーフィールドを送信しなければなりません (MUST)。&lt;HTTP2-Settings&lt; ヘッダーフィールドは、HTTP/2 接続を制御するパラメーターを含むホップ間で有効なヘッダーフィールドです。このフィールドは、サーバーがアップグレードリクエストを受け付けることを見越して送信されます。このヘッダーフィールドが設定されていない場合、サーバーはアップグレードを拒否しなければなりません (MUST)。</p>
+<pre>HTTP2-Settings = token68</pre>
+<p>&lt;HTTP2-Settings&lt; ヘッダーフィールドの内容は、SETTINGS フレーム (<a href="#section6-5">6.5節</a>) のペイロードであり、base64url (これは、最後の '=' を省略した <a href="#RFC4648">[RFC4648]</a> の5章で説明されている URL セーフかつファイル名セーフの Base64 エンコードです) 文字列としてエンコードされます。&lt;token68&lt; の ABNF <a href="#RFC5234">[RFC5234]</a> プロダクションは、<a href="#HTTP-p7">[HTTP-p7]</a> の2.1節に定義されています。</p>
+<p>これはホップ間のヘッダーフィールドであるため、HTTP/2 にアップグレードする時は &lt;Connection&lt; ヘッダーフィールドに &lt;Upgrade&lt; に加えて &lt;HTTP2-Settings&lt; も含まなければなりません (MUST)。</p>
+<p>サーバーは他の SETTINGS フレームと同じように、これらの値をデコードし、解釈します。101レスポンスは、暗黙的な応答としての役割を果たすため、SETTINGS パラメーターの応答 (<a href="#section6-5-3">6.5.3節</a>) は不要です。このような値をアップグレードリクエストで提供することで、プロトコルは上記 SETTINGS パラメーターのデフォルト値を必要としません。そして、クライアントがサーバーからフレームを受信するよりも前に、他のパラメーターを送信できる機会を持てるようになります。</p>
+
+<h3 id="section3-3">3.3. &quot;https&quot; URI での HTTP/2 の開始</h3>
+<p>HTTP/2 の対応を事前に知らずに &quot;https&quot; URI へのリクエストをするクライアントは、 TLS <a href="#TLS12">[TLS12]</a> と Application layer protocol negotiation extension <a href="#TLSALPN">[TLSALPN]</a> を利用します。</p>
+<p>TLS ネゴシエーションが完了すると、クライアントとサーバーはコネクションプリフェイス (<a href="#section3-5">3.5節</a>) を送信します。</p>
+
+<h3 id="section3-4">3.4. 事前知識による HTTP/2 の開始</h3>
+<p>クライアントは、他の方法で特定のサーバーが HTTP/2 に対応していることを知ることができます。例えば、<a href="#ALT-SVC">[ALT-SVC]</a> では HTTP ヘッダーフィールドで対応状況を通知するメカニズムを説明しており、ALTSVC フレーム (<a href="#section6-11">6.11節</a>) は HTTP/2 における同様のメカニズムを説明しています。</p>
+<p>クライアントは、HTTP/2 に対応していることが分かっているサーバーに対しては、コネクションプリフェイス (<a href="#section3-5">3.5節</a>) に続いて直ちに HTTP/2 フレームを送信してもよいものとします (MAY)。サーバーはコネクションプリフェイスにおける &quot;PRI&quot; メソッドの使用により、このような接続を識別できます。これは &quot;http&quot; URI の解決にのみ影響し、&quot;https&quot; URI について HTTP/2 に対応するサーバーは TLS のプロトコルネゴシエーション <a href="#TLSALPN">[TLSALPN]</a> に対応する必要があります。</p>
+<p>事前知識による HTTP/2 接続は、今後のコネクションに対しても指定されたサーバーが HTTP/2 に対応するという強いシグナルではありません。サーバーの設定の変更や、クラスター化されたサーバーインスタンス間で異なる設定をする、ネットワーク状況を変更するといったことは可能です。</p>
+
+<h3 id="section3-5">3.5. HTTP/2 コネクションプリフェイス</h3>
+<p>TCP 接続が確立し、両方のピアが HTTP/2 の使用を決定するにあたり、最終的な確認と HTTP/2 接続の初期 SETTINGS パラメーターの確立のために、各エンドポイントはコネクションプリフェイスを送信しなければなりません (MUST)。</p>
+<p>クライアントコネクションプリフェイスは、24オクテットの配列ではじまり、16進数表現は以下のようになります (文字列表現: &quot;PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n&quot;):</p>
+<pre>0x505249202a20485454502f322e300d0a0d0a534d0d0a0d0a</pre>
+<p>この配列の後には、SETTINGS フレーム (<a href="#section6-5">6.5節</a>) が続きます。SETTINGS フレームは空であってもよいものとします (MAY)。101 Switching Protocols レスポンス (Upgrade の完了を示します) を受信した直後、もしくは TLS 接続の最初のアプリケーションデータのオクテットとして、クライアントはただちにクライアントコネクションプリフェイスを送信します。サーバーがサポートするプロトコルを事前に知っていることによって HTTP/2 接続を開始する場合は、クライアントはコネクションを確立した直後にコネクションプリフェイスを送信します。</p>
+<p class="note">多数の HTTP/1.1 や HTTP/1.0 のサーバー、中継システムがさらにフレームを処理しないよう、このクライアントコネクションプリフェイスが選ばれました。これは、<a href="#TALKING">[TALKING]</a> で提起された懸念には対応しないことに注意してください。</p>
+<p>サーバーコネクションプリフェイスは空の可能性がある SETTINGS フレーム (<a href="#section6-5">6.5節</a>) だけで構成され、HTTP/2 接続においてサーバーが送信する最初のフレームでなければなりません (MUST)。</p>
+<p>不要なレイテンシを防ぐために、クライアントはクライアントコネクションプリフェイスの送信後、サーバーコネクションプリフェイスの受信を待たずに、すぐに追加のフレームをサーバーに送信することが認められています。しかしながら、サーバーコネクションプリフェイスの SETTINGS フレームが、クライアントがサーバーとどのように通信するかを変更するパラメーターを含む可能性があることに注意しないといけません。クライアントは、SETTINGS フレームを受信後に直ちにすべてのパラメーターに従うことが求められます。</p>
+<p>どちらかのピアが、正しいコネクションプリフェイスを使って通信を開始しない場合は、クライアントとサーバーは TCP 接続を切断しなければなりません (MUST)。そのピアが HTTP/2 を使用していないことが明らかな場合には、GOAWAY フレーム (<a href="#section6-8">6.8節</a>) は省略してもよいものとします (MAY)。</p>
+</div>
+
+<div class="section">
+<h2 id="section4">4. HTTP フレーム</h2>
+<p>HTTP/2 接続が確立されると、クライアントとサーバーはフレームの送信を開始できます。</p>
+
+<h3 id="section4-1">4.1. フレームフォーマット</h3>
+<p>全てのフレームは、8オクテットのヘッダーから始まり、0から16,383オクテットのペイロードが続きます。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| R |     Length (14)           |   Type (8)    |   Flags (8)   |
++-+-------------+---------------+-------------------------------+
+|R|                 Stream Identifier (31)                      |
++-+-------------------------------------------------------------+
+|                   Frame Payload (0...)                      ...
++---------------------------------------------------------------+
+
+                         フレームヘッダー
+</pre>
+<p>フレームヘッダーのフィールドは以下のように定義されます:</p>
+<dl>
+<dt>Length</dt>
+<dd>符号なし16ビット整数で表現されるフレームペイロードの長さです。フレームヘッダーの8オクテットはこの値には含まれません。</dd>
+<dt>Type</dt>
+<dd>8ビットのフレームタイプです。フレームタイプは以降のフレームヘッダーとペイロードをどのように解釈するかを決定します。実装は、不明なフレームタイプ (この文書内に定義されていないフレームタイプ) の受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+<dt>R</dt>
+<dd>予約済みの2ビットのフィールドです。このビットのセマンティクスは定義されていません。送信する時は未設定 (0) のままにしなければならず (MUST)、受信時には無視されなければなりません (MUST)。</dd>
+<dt>Flags</dt>
+<dd>フレームタイプ固有の真偽値フラグのために予約された8ビットのフィールドです。</dd>
+<dd>フラグは、指定されたフレームタイプに固有のセマンティクスが割り当てられます。特定のフレームタイプにセマンティクスが定義されていないフラグは無視されなければならず (MUST)、送信時には未設定 (0) のままにしなければなりません (MUST)。</dd>
+<dt>R</dt>
+<dd>予約済みの1ビットのフィールドです。このビットのセマンティクスは定義されていません。送信する時は未設定 (0) のままにしなければならず (MUST)、受信時には無視されなければなりません (MUST)。</dd>
+<dt>Stream Identifier</dt>
+<dd>31ビットのストリームID (<a href="#section5-1-1">5.1.1節</a>) です。0の値は、個々のストリームではなく、コネクションそのものに関連するフレームのために予約されます。</dd>
+</dl>
+<p>フレームペイロードの構造と内容については、フレームタイプに完全に依存します。</p>
+
+<h3 id="section4-2">4.2. フレームサイズ</h3>
+<p>フレームペイロードの最大サイズはフレームタイプにより異なります。フレームペイロードの絶対的な最大サイズは 2^14-1 (16,383) オクテットです。これはつまり、フレームの最大サイズは 16,391 オクテットであることを意味します。全ての実装は、最大サイズまでのフレームを受信し、最低限の処理が可能であるべきです (SHOULD)。</p>
+<p>PING (<a href="#section6-7">6.7節</a>) のような特定のフレームタイプでは、ペイロードデータのサイズについて追加の制限を加えます。同様に追加のサイズ制限は、特定アプリケーション用途 (<a href="#section9">9章</a>) により設定できます。</p>
+<p>フレームサイズが定義された制限を越えていたり、必要なフレームデータを含むには小さすぎるような場合は、エンドポイントは FRAME_SIZE_ERROR エラーを送信しなければなりません (MUST)。接続の状態を変更可能なフレームにおけるフレームサイズエラーは、コネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱われなければなりません (MUST)。これらの対象には、ヘッダーブロック (<a href="#section4-3">4.3節</a>) を転送するフレーム (つまり HEADERS や PUSH_PROMISE、CONTINUATION) や SETTINGS、ストリームID が0の WINDOW_UPDATE フレームが含まれます。</p>
+
+<h3 id="section4-3">4.3. ヘッダーの圧縮と伸張</h3>
+<p>HTTP/2 におけるヘッダーフィールドは、1つ以上の値が設定された名前-値のペアです。これらは、HTTP リクエストとレスポンスのメッセージおよび、サーバープッシュ処理に使用されます (<a href="#section8-2">8.2節</a>)。</p>
+<p>ヘッダーセットは、0個以上のヘッダーフィールドからなる集合です。コネクションを通じて転送されるとき、ヘッダーセットは HTTP ヘッダー圧縮 <a href="#COMPRESSION">[COMPRESSION]</a> を使用してヘッダーブロックにシリアライズされます。シリアライズされたヘッダーブロックは、ヘッダーブロックフラグメントと呼ばれる1つ以上のオクテット列に分割され、HEADERS (<a href="#section6-2">6.2節</a>)、 PUSH_PROMISE (<a href="#section6-6">6.6節</a>)、または CONTINUATION (<a href="#section6-10">6.10節</a>) フレームのペイロードとして転送されます。</p>
+<p>HTTP ヘッダー圧縮はヘッダーフィールドの対応する順序を保持しません。複数の値を持つヘッダーフィールドは、特別な区切り文字を使用して単一のヘッダーフィールドにエンコードされます。詳しくは<a href="#section8-1-3-3">8.1.3.3</a>節を参照してください。</p>
+<p>Cookie ヘッダーフィールド <a href="#COOKIE">[COOKIE]</a> は HTTP マッピングにより特別に処理されます。詳しくは<a href="#section8-1-3-4">8.1.3.4節</a>を参照してください。</p>
+<p>受信側エンドポイントはフラグメントを結合することでヘッダーブロックを再構築し、ヘッダーセットを復元するために伸張します。</p>
+<p>完全なヘッダーブロックは以下のどちらかで構成されます:</p>
+<ul>
+  <li>END_HEADERS フラグが設定された単一の HEADERS または PUSH_PROMISE フレーム。</li>
+  <li>最後のフレームに END_HEADERS フラグが設定された1つ以上の CONTINUATION フレームを伴う、END_HEADERS が未設定になっている HEADERS または PUSH_PROMISE フレーム。</li>
+</ul>
+<p>ヘッダー圧縮は状態を持ち、コネクション全体で単一の圧縮コンテキストを仕様します。各ヘッダーブロックは別々の単位として処理されます。ヘッダーブロックは、他の種類のフレームや他のストリームのフレームの間に挟み込まれずに、連続した一連のフレームとして送信されなければなりません (MUST)。一連の HEADERS や CONTINUATION フレームの最後のフレームには、END_HEADERS フラグが設定されていなければなりません (MUST)。また、一連の PUSH_PROMISE や CONTINUATION フレームの最後のフレームにも、END_HEADERS フラグが設定されていなければなりません (MUST)。</p>
+<p>ヘッダーブロックフラグメントは HEADERS、PUSH_PROMISE、CONTINUATION フレームのペイロードでのみ送信できます。これらのフレームは、受信者が保持する圧縮コンテキストを変更するデータを転送するためです。HEADERS、PUSH_PROMISE、CONTINUATION フレームを受信したエンドポイントは、フレームの破棄が発生したような場合であっても、ヘッダーブロックを再構築し、伸張しなければなりません (MUST)。ヘッダーブロックを伸張できない場合、受信者は COMPRESSION_ERROR コネクションエラー (<a href="#section5-4-1">5.4.1節</a>) と共にコネクションを終了しなければなりません (MUST)。</p>
+</div>
+
+<div class="section">
+<h2 id="section5">5. ストリームと多重化</h2>
+<p>&quot;ストリーム&quot; とは、HTTP/2 接続においてクライアントとサーバーとの間で交換されるフレームの独立した双方向シーケンスです。ストリームにはいくつかの重要な特徴があります:</p>
+<ul>
+  <li>1つの HTTP/2 接続には、複数の開いたストリームを並列して含むことができます。どちらのエンドポイントも複数ストリームからフレームを交互にやり取りできます。</li>
+  <li>ストリームはクライアントやサーバーのどちらからでも確立でき、片方で一方的に使用したり、双方で共有したりできます。</li>
+  <li>ストリームはどちらのエンドポイントからでも閉じることができます。</li>
+  <li>ストリームに送信されるフレームの順序は重要です。受信者は受信した順序でフレームを処理します。</li>
+  <li>ストリームは整数により識別されます。ストリームIDは、ストリームを開始するエンドポイントによってストリームに割り当てられます。</li>
+</ul>
+
+<h3 id="section5-1">5.1. ストリームの状態</h3>
+<p>ストリームのライフサイクルは、図1に示したようになります。</p>
+<pre>                      +--------+
+                PP    |        |    PP
+             ,--------|  idle  |--------.
+            /         |        |         \
+           v          +--------+          v
+    +----------+          |           +----------+
+    |          |          | H         |          |
+,---| reserved |          |           | reserved |---.
+|   | (local)  |          v           | (remote) |   |
+|   +----------+      +--------+      +----------+   |
+|      |          ES  |        |  ES          |      |
+|      | H    ,-------|  open  |-------.      | H    |
+|      |     /        |        |        \     |      |
+|      v    v         +--------+         v    v      |
+|   +----------+          |           +----------+   |
+|   |   half   |          |           |   half   |   |
+|   |  closed  |          | R         |  closed  |   |
+|   | (remote) |          |           | (local)  |   |
+|   +----------+          |           +----------+   |
+|        |                v                 |        |
+|        |  ES / R    +--------+  ES / R    |        |
+|        `----------->|        |<-----------'        |
+|  R                  | closed |                  R  |
+`-------------------->|        |<--------------------'
+                      +--------+
+
+  H:  HEADERS フレーム (CONTINUATION が続く可能性がある)
+  PP: PUSH_PROMISE フレーム (CONTINUATION が続く可能性がある)
+  ES: END_STREAM フラグ
+  R:  RST_STREAM フレーム
+
+                 図1: ストリームの状態
+</pre>
+<p>両方のエンドポイントは、それぞれの立場に応じたストリーム状態図を持ち、フレーム転送中では両者は異なるでしょう。エンドポイントはストリームの作成について互いに連携しません。ストリームはどちらかのエンドポイントにより一方的に作成されます。状態の不一致に伴う悪い影響は、RST_STREAM を送信した後の &quot;closed&quot; 状態に限定されます。その場合クローズ後にしばらくフレームを受信するかもしれません。</p>
+<p>ストリームは次のような状態を持ちます:</p>
+<dl>
+  <dt>idle</dt>
+  <dd>
+    <p>全てのストリームは &quot;idle&quot; 状態からはじまります。この状態ではフレームは交換されません。</p>
+    <p>この状態では、次のような遷移が有効です:</p>
+    <ul>
+      <li>HEADER フレームの送信や受信は、ストリームを &quot;open&quot; 状態にします。<a href="#section5-1-1">5.1.1節</a>で説明されるようにストリームIDが選択されます。同一の HEADERS フレームはストリームをすぐに &quot;half closed&quot; にする可能性があります。</li>
+      <li>PUSH_PROMISE フレームの送信は、今後使用される関連ストリームであることを示します。予約済みストリームの状態は &quot;reserved (local)&quot; に遷移します。</li>
+      <li>PUSH_PROMISE フレームを受信は、リモートピアにより予約された関連ストリームであることを示します。このストリームの状態は &quot;reserved (remote)&quot; に遷移します。</li>
+    </ul>
+  </dd>
+  <dt>reserved (local)</dt>
+  <dd>
+    <p>&quot;reserved (local)&quot; 状態のストリームは、PUSH_PROMISE を送信して予約した状態です。PUSH_PROMISE フレームは、idle ストリームとリモートピアから始めた open ストリームを関連付けることによって、その idle ストリームを予約します (<a href="#section8-2">8.2節</a>)。</p>
+    <p>この状態では、次のような遷移のみ可能です:</p>
+    <ul>
+      <li>エンドポイントは HEADERS フレームを送信できます。これは、ストリームを &quot;half closed (remote)&quot; 状態でオープンします。</li>
+      <li>いずれかのエンドポイントは、ストリームを &quot;closed&quot; にするために RST_STREAM を送信できます。これはストリームの予約を解除します。</li>
+    </ul>
+    <p>この状態において、エンドポイントは HEADERS または RST_STREAM 以外のフレームを送信してはいけません。(MUST NOT)。</p>
+    <p>PRIORITY フレームはこの状態で受信してもよいものとします (MAY)。RST_STREAM や PRIORITY フレーム以外の受信については、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+  </dd>
+  <dt>reserved (remote)</dt>
+  <dd>
+    <p>&quot;reserved (remote)&quot; 状態のストリームは、リモートピアにより予約されています。</p>
+    <p>この状態では、次のような遷移のみ可能です:</p>
+    <ul>
+      <li>HEADERS フレームを受信すると、ストリームは &quot;half closed (local)&quot; に遷移します。</li>
+      <li>いずれかのエンドポイントは、ストリームを &quot;closed&quot; にするために RST_STREAM を送信できます。これはストリームの予約を解除します。</li>
+    </ul>
+    <p>エンドポイントは、予約済みストリームの優先度を変更するために、この状態で PRIORITY フレームを送信してもよいものとします (MAY)。また、エンドポイントは RST_STREAM や PRIORITY フレーム以外の種類のフレームを送信してはいけません (MUST NOT)。</p>
+    <p>HEADERS や RST_STREAM フレーム以外の受信については、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+  </dd>
+  <dt>open</dt>
+  <dd>
+    <p>&quot;open&quot; 状態のストリームは、両方のピアがいかなる種類のフレームを送信するために使用できます。この状態では、送信側のピアはストリームレベルのフロー制御 (<a href="#section5-2">5.2節</a>) に従います。</p>
+    <p>この状態から、どちらのエンドポイントも END_STREAM フラグを設定したフレームを送信できます。それによって、ストリームは &quot;half closed&quot; 状態に遷移します。すなわちエンドポイントが END_STREAM フラグを送信すると、ストリームの状態は &quot;half closed (local)&quot; となり、エンドポイントが END_STREAM フラグを受信した場合は、ストリームの状態が &quot;half closed (remote)&quot; になります。END_STREAM フラグを設定した HEADERS フレームの後には CONTINUATION フレームが続くことができます。</p>
+    <p>この状態では、どちらのエンドポイントも直ちに &quot;closed&quot; に遷移させる RST_STREAM フレームを送信できます。</p>
+  </dd>
+  <dt>half closed (local)</dt>
+  <dd>
+    <p>&quot;half closed (local)&quot; のストリームは、フレームの送信に使用することはできません。</p>
+    <p>END_STREAM フラグを含むフレームを受信するか、いずれかのピアが RST_STREAM フレームを送信した時、ストリームはこの状態から &quot;closed&quot; に遷移します。</p>
+    <p>この状態では、受信者は WINDOW_UPDATE や PRIORITY フレームを無視できます。END_STREAM フラグが設定されたフレームを送信した後の短時間に、これらのフレームタイプが到着することがあります。</p>
+  </dd>
+  <dt>half closed (remote)</dt>
+  <dd>
+    <p>&quot;half closed (remote)&quot; 状態のストリームは、もはやピアによるフレームの送信には使用されません。この状態において、エンドポイントがフロー制御している場合でも、受信者のフロー制御ウインドウを保持する必要はありません。</p>
+    <p>エンドポイントが、この状態にあるストリームから CONTINUATION フレーム以外の追加のフレームを受信した場合は、STREAM_CLOSED のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) を返さなければなりません (MUST)。</p>
+    <p>ストリームは、END_STREAM フラグを含むフレームを送信するか、いずれかのピアが RST_STREAM フレームを送信することで、この状態から &quot;closed&quot; 状態に遷移できます。</p>
+  </dd>
+  <dt>closed</dt>
+  <dd>
+    <p>"closed" 状態は最終的な状態です。</p>
+    <p>エンドポイントは closed ストリームにフレームを送信してはいけません (MUST NOT)。RST_STREAM フレームを受信した後に、さらにフレームを受信したエンドポイントは、STREAM_CLOSED のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として扱わなければなりません (MUST)。同様に、END_STREAM フラグが設定された DATA フレームを受信した後にさらにフレームを受信したり、END_STREAM フラグが設定された HEADERS フレームを受信した後に、CONTINUATION フレームを以外のフレームを受信したエンドポイントも、STREAM_CLOSED のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として扱わなければなりません (MUST)。</p>
+    <p>END_STREAM フラグが含まれる DATA フレームや HEADERS フレームが送信された後の少しの間、WINDOW_UPDATE や PRIORITY、RST_STREAM フレームをこの状態で受信できます。リモートピアが、END_STREAM フラグが設定されたフレームを受信し、処理するまでは、リモートピアがこれらいずれかのフレームタイプを送信するかもしれません。エンドポイントは、この状態で受信した WINDOW_UPDATE や PRIORITY、RST_STREAM フレームを無視しなければなりません (MUST)。しかしながら、エンドポイントは END_STREAM を送信した後かなり時間が経ってから到着したフレームを PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱うことを選択してもよいものとします (MAY)。</p>
+    <p>もし RST_STREAM フレームを送信した結果としてこの状態に至った場合、RST_STREAM を受信したピアは、このストリームに対してフレームを既に送信していたり送信キューに入れていたりして、取りやめることができないかもしれません。エンドポイントは、RST_STREAM フレームを送信した後、closed ストリームで受信したフレームを無視しなければなりません (MUST)。エンドポイントは、この時点以降に到着したフレームを無視するか、エラーとして扱うかの期限を制限するかを選択してもよいものとします (MAY)。</p>
+    <p>RST_STREAM の送信後に受信したフロー制御下のフレーム (例: DATA) は、コネクションフロー制御のウインドウとして計算されます。これらのフレームは無視されるかもしれませんが、送信者が RST_STREAM を受信する前にフレームが送信されているため、送信者はコネクションフロー制御ウインドウを計算するようにこれらのフレームを考慮します。</p>
+    <p>エンドポイントは、RST_STREAM を送信した後に PUSH_PROMISE や CONTINUATION を受信するかもしれません。PUSH_PROMISE は関連付けられたストリームが終了されているかにかかわらず、ストリームを &quot;reserved&quot; に遷移させます。したがって、不要な予約済みストリームを終了するには RST_STREAM が必要になります。</p>
+  </dd>
+</dl>
+<p>この文書の他の場所においてより具体的な指針が存在しない場合、実装は、状態の説明において明示的に許可されていないメッセージの受信についてを PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱うべきです (SHOULD)。</p>
+
+<h4 id="section5-1-1">5.1.1. ストリームID</h4>
+<p>ストリームは、符合なし31ビットの整数で識別されます。クライアントが開始したストリームは奇数のストリームIDを使わなければなりません (MUST)。また、サーバーが開始したストリームは偶数のストリームIDを使わなければなりません (MUST)。0 (0x0) のストリームIDは、コネクション制御メッセージに使用されます。0のストリームIDは新しいストリームの確立に使用してはいけません (MUST NOT)。</p>
+<p>HTTP/2 に Upgrade する HTTP/1.1 リクエスト (<a href="#section3-2">3.2節</a>) には、ストリームID 1 (0x1) で応答されます。Upgrade の完了後、ストリーム 0x1はクライアントに対して &quot;half closed (local)&quot; になります。したがって、HTTP/1.1 から Upgrade するクライアントが、ストリーム 0x1を新しいストリームIDとして選択することはできません。</p>
+<p>新しく確立されるストリームIDは、エンドポイントがすでに開始または予約した全てのストリームよりも大きい数値でなければなりません (MUST)。この影響を受けるのは、HEADERS フレームを使用して開始されたストリームと、PUSH_PROMISE を使用して予約されたストリームです。予期せぬストリームIDを受信したエンドポイントは、PROTOCOL_ERROR タイプのコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) を返さなければなりません (MUST)。</p>
+<p>新しいストリームIDを利用すると、それより小さいストリームIDで &quot;idle&quot; 状態のストリームを全て暗黙的に終了します。例えば、クライアントがストリームID 5 のフレームを送信することなくストリームID 7 の HEADERS フレームを送信した場合、ストリームID 7 のフレームを最初に送受信した時点で、ID 5 のストリームは &quot;closed&quot; 状態に遷移します。</p>
+<p>ストリームIDは再利用できません。長時間のコネクションでは、エンドポイントがストリームIDの利用可能な範囲を越えてしまう可能性があります。新しいストリームIDを生成できないクライアントは、新しいストリームのために新たなコネクションを確立できます。</p>
+
+<h4 id="section5-1-2">5.1.2. ストリームの並行処理</h4>
+<p>ピアは、SETTINGS フレームの　SETTINGS_MAX_CONCURRENT_STREAMS パラメーターを使用することで、同時アクティブなストリームの数を制限できます。最大同時ストリーム設定は各エンドポイントに固有であり、その設定を受信したピアにのみ適用されます。つまり、クライアントはサーバーが開始可能な同時ストリームの最大数を指定し、サーバーはクライアントが開始可能な同時ストリームの最大数を指定します。エンドポイントはそれぞれのピアが設定したこの制限を越えてはいけません (MUST NOT)。</p>
+<p>エンドポイントが開始可能なストリームの最大数は、&quot;open&quot; または2つの &quot;half closed&quot; 状態のストリームの数で計算されます。これら3つの状態にあるストリームは SETTINGS_MAX_CONCURRENT_STREAMS 設定で指定された制限に数えられます (<a href="#section6-5-2">6.5.2節</a>)。</p>
+<p>告知した同時ストリーム制限を超えるような HEADERS フレームを受信したエンドポイントは、それをストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として扱わなければなりません (MUST)。</p>
+<p>2つの &quot;reserved&quot; 状態にあるストリームは、開始されたストリームとしては数えられません。</p>
+
+<h3 id="section5-2">5.2. フロー制御</h3>
+<p>ストリームの多重化を使用すると、TCP 接続を使用する上で競合が発生し、その結果ストリームのブロックが起こります。フロー制御の仕組みは、同一コネクション上でストリームが互いに破壊的な干渉をしないことを保証します。フロー制御は、個々のストリームとコネクション全体のどちらにも使用されます。</p>
+<p>HTTP/2 では、WINDOW_UPDATE フレームの使用を通じて、フロー制御を提供します。</p>
+
+<h4 id="section5-2-1">5.2.1. フロー制御の原則</h4>
+<p>HTTP/2 のストリームフロー制御は、プロトコルの変更の必要なしに、フロー制御アルゴリズムを将来的に改善できるようにすることを目標にしています。HTTP/2 におけるフロー制御は以下のような特徴があります:</p>
+<ol>
+  <li>フロー制御はホップ間でおこなわれ、エンドポイント間でおこなわれません。</li>
+  <li>フロー制御はウインドウ更新フレームに基づきます。受信者は、どれぐらいのバイトをストリームとコネクション全体から受信する準備ができているかを告知します。これは信頼に基づいた仕組みです。</li>
+  <li>フロー制御は方向性を持ち、受信者によって全体的な制御がおこなわれます。受信者は、それぞれのストリームとコネクション全体に対して好ましいウインドウサイズを選択し、設定してもよいものとします (MAY)。送信者は、受信者が設定したフロー制御を尊重しなければなりません (MUST)。クライアント、サーバーそして中継者は、すべて独立して、受信者としてフロー制御ウインドウを告知し、送信する際はピアによって設定されたフロー制御制限に従います。</li>
+  <li>新しいストリームとコネクション全体のフロー制御ウインドウの初期値は、どちらも65,535バイトです。</li>
+  <li>フロー制御をフレームに適応するかどうかはフレームタイプによって決定されます。この文書で述べられるフレームのうち、DATA フレームのみがフロー制御の対象となります。他の全てのフレームタイプは、通知されたフロー制御ウインドウの容量を消費しません。これは、重要なコントロールフレームがフロー制御によりブロックされないことを保証します。</li>
+  <li>フロー制御を無効化することはできません。</li>
+  <li>HTTP/2 は WINDOW_UPDATE フレーム (<a href="#section6-9">6.9節</a>) のフォーマットのみを標準化します。このフレームを送信するタイミングや、送信する値を受信者がどのように決定するかについては規定しません。また、送信者がパケットの送信を選択する方法についても規定しません。実装は、自身のニーズにあった任意のアルゴリズムを選択できます。</li>
+</ol>
+<p>装には、優先度に基づいてリクエストやレスポンスを送信する方法の管理や、リクエストの行頭ブロッキングを防ぐ方法の選択、新しいストリームの作成の管理などをする責任があります。これらのアルゴリズムの選択肢は、フロー制御アルゴリズムと相互に影響します。</p>
+
+<h4 id="section5-2-2">5.2.2. 適切なフロー制御の使用</h4>
+<p>フロー制御は、リソース制限下で動作しているエンドポイントを保護するために定義されています。例えばプロキシは、多くのコネクションの間でメモリーを共有する必要があり、そこには低速なアップストリームや高速なダウンストリームを含む可能性があるでしょう。フロー制御は、受信者があるストリームのデータの処理ができないけれども、同一コネクション上の他のストリームの処理を継続したい場合に対応します。</p>
+<p>この機能を必要としない構成では、新しいデータを受信した際に利用可能な容量を増加させるように最大サイズのフロー制御ウインドウを告知できます。フロー制御は送信者からは無効化できないことに注意してください。送信されるデータは常に受信者により通知されたフロー制御ウインドウの影響を受けます。</p>
+<p>リソース (例えばメモリーなど) が制限された構成では、ピアが使用するメモリーの量を制限するために、フロー制御を使用してもよいものとします (MAY)。しかしながら、帯域幅遅延積 (<a href="#RFC1323">[RFC1323]</a>) についての知識なしにフロー制御を有効化した場合、利用可能なネットワークリソースを適切に利用できない可能性があることに注意してください。</p>
+<p>最新の帯域幅遅延積についての十分な知識があるとしても、フロー制御の実装は困難である可能性があります。フロー制御を使用する時、受信者は TCP の受信バッファを直ちに読み込まなければなりません (MUST)。読み込みに失敗すると、WINDOW_UPDATE などの重要なフレームが HTTP/2 で使えず、デッドロックを引き起こす可能性があります。しかしながらフロー制御は、コネクションの利便性を低下させることなく、制約のあるリソースを保護することを保証します。</p>
+
+<h3 id="section5-3">5.3. ストリームの優先度</h3>
+<p>クライアントは、ストリームを開始する HEADERS フレーム (<a href="#section6-2">6.2節</a>) に優先度情報を含めることで、新しいストリームの優先度を指定できます。既存のストリームでは、PRIORITY フレーム (<a href="#section6-3">6.3節</a>) を使用して優先度を変更できます。</p>
+<p>優先度の目的は、エンドポイントが同時ストリームを管理する際に、そのピアに対してリソースの割り当て方法を明示できるようにすることです。最も重要なのは、送信キャパシティが限られている時に、フレームを転送するストリームを選択するために優先度が使用できることです。</p>
+<p>ストリームは、他のストリームの完了 (<a href="#section5-3-1">5.3.1節</a>) に依存する関係を作ることで、優先度を設定できます。各依存関係には、相対的な重みが割り当てられ、その値は、同じストリームに依存するストリームに割り当てられた利用可能なリソースの、相対的な比率を決定するために使用されます。</p>
+<p>ストリームの優先度を明示的に設定することは、優先度付け処理への入力になります。これは他のストリームに相対するストリームに対して、特別な処理や転送順序を保証するものではありません。エンドポイントは優先度を使用して、ピアに特定の順序による同時ストリームの処理を強制できません。優先度を明示することは、あくまで提案でしかありません。</p>
+<p>優先度情報は HEADERS フレームを使用して生成するストリームに明示的に指定したり、PRIORITY フレームを使用して変更できます。優先度情報の提供は任意です。特に指示がない場合は、デフォルトの値が使用されます (<a href="#section5-3-5">5.3.5節</a>)。</p>
+
+<h4 id="section5-3-1">5.3.1. ストリームの依存関係</h4>
+<p>各ストリームは他のストリームに明示的な依存関係を与えることができます。依存関係を含めることで、依存ストリームよりも指定されたストリームへのリソースの割り当てが優先されることを表現します。</p>
+<p>他のストリームに依存しないストリームには0x0のストリーム依存関係が与えられます。</p>
+
+<p>他のストリームに依存するストリームは、依存先のストリームの優先度グループの一部となり、依存先のストリームと同じ依存関係ツリーに属することになります。</p>
+<p>優先度グループに直接割り当てられたストリームは、他のストリームに依存しません。そのストリームは優先度グループ内の依存関係ツリーのルートになります。</p>
+<p>ストリームを他のストリームの依存関係に割り当てるとき、デフォルトでは依存先のストリームの新しい依存関係として追加されます。例えば、ストリームBとCがストリームAに依存する時、ストリームAを依存先とするストリームDが生成された場合、依存関係はAに続いて、B、C、Dの順序になります。</p>
+<pre>  A                 A
+ / \      ==>      /|\
+B   C             B D C
+
+ デフォルト依存関係の生成例
+</pre>
+<p>排他フラグは依存関係に新しい階層を挿入できます。排他フラグは、自身のストリームを依存先のストリームに対して唯一の依存関係となるようにします。他の依存関係は、自身のストリームの依存関係とします。先ほどの例において、ストリームAに対して排他依存関係と共にストリームDを生成した場合、Aの依存順序の結果はAの後にDが続き、さらにその後にBとCが続くことになります。</p>
+<pre>                    A
+  A                 |
+ / \      ==>       D
+B   C              / \
+                  B   C
+
+    排他依存の生成例
+</pre>
+<p>依存ツリーの内部では、依存先のストリームが終了していたり、ストリームを進展させるのが不可能であった場合でも、依存ストリームにはリソースが割り当てられるべきです (SHOULD)。</p>
+
+<h4 id="section5-3-2">5.3.2. 依存関係の重み付け</h4>
+<p>各依存関係には、1から256までの整数の重みが割り当てられます。</p>
+<p>同じ依存関係にあるストリームは、それらの重みに比例してリソースが割り当てられるべきです (SHOULD)。例えば、ストリームAに依存するストリームBの重みが4であり、同じストリームAに依存するストリームCの重みが12であった場合、Aに何も進展がなければ、ストリームBにはストリームCに割り当てられたリソースの3分の1が割り当てられます。</p>
+<p>ストリームは自身に依存してはいけません (MUST NOT)。エンドポイントはこれを PROTOCOL_ERROR のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として扱ったり、デフォルト優先度の値 (<a href="#section5-3-5">5.3.5節</a>) をストリームに割り当ててもよいものとします (MAY)。</p>
+
+<h4 id="section5-3-3">5.3.3. 再優先度付け</h4>
+<p>ストリームの優先度は PRIORITY フレームの使用により変更されます。依存関係を設定すると、ストリームを指定したストリームに依存させます。</p>
+<p>再優先度付けされたストリームに依存する全てのストリームは、そのストリームと共に移動します。再優先度付けされたストリームに排他フラグを伴う依存関係を設定すると、そのストリームの全ての依存関係を、再優先度付けされたストリームの依存関係になるように移動します。</p>
+<p>ストリームが、自身に依存するストリームの1つに依存関係を生成する場合、以前の依存ストリームは、重みを維持したまま、最初に再優先度付けされるストリームの依存先として移動されます。</p>
+<p>例えば、BとCがAに、DとEがCに、FがDに依存する依存ツリーがあり、AがDに依存関係を生成する場合、DはAの依存先となり、Aの位置に移動します。他の依存関係は変更されません。</p>
+<pre>                   0
+  A               / \               D                 D
+ / \             D   A             / \       または    |
+B   C     ==>   /   / \    ==>    F   A       ==>     A
+   / \         F   B   C             / \             /|\
+  D   E                |            B   C           B C F
+  |                    E                |             |
+  F                                     E             F
+               (中間状態)       (非排他的状態)      (排他的状態)
+
+                   依存関係の並び替えの例
+</pre>
+
+<h4 id="section5-3-4">5.3.4. 優先度付けの状態管理</h4>
+<p>ストリームが依存ツリーから削除された際、その依存関係は、終了したストリームの依存先のストリームに移動できます。新しい依存関係における重みは、自身の重みに基づき、終了したストリームの依存関係の重みに比例して割り当てられるべきです (SHOULD)。</p>
+<p>依存ツリーから削除されたストリームは、一部の優先度情報が失われる可能性があります。リソースは、同じストリームに依存するストリーム間で共有されます。これは、そのセット内のストリームが終了するか、ブロックされた状態になった場合、ストリームに割り当てられた予備のリソースはすぐ隣同士のストリームに分散されることを意味します。しかしながら、共有の依存関係がツリーから削除された場合、それらのストリームは、次の上位レベルのストリームとリソースを共有します。例えば、まずストリームAとBが依存を共有しており、CとDの両方がAに依存していると仮定します。ストリームAとDの処理が続行できない場合は、Aを削除する前に、CがAのためのリソースの全てを受け取ります。もしAがツリーから削除された場合、Aの重みはDとEに均等に分割されます。その結果、ストリームCは減少した比率 (半分ではなく、3分の1) のリソースを受け取ります。</p>
+<p>ストリームの依存関係を生成する優先度情報が転送中でも、そのストリームを終了することは可能です。依存関係に指定されたストリームが終了し、関連する優先度情報が破棄された場合は、依存ストリームには代わりにデフォルト優先度が割り当てられます。ストリームにはピアによる明示よりも高い有効な優先度を与えることができるので、潜在的には次善の優先度を設定します。</p>
+<p>これらの問題を防ぐために、エンドポイントはストリームが終了した後しばらくの間、終了したストリームの優先度の状態を維持すべきです (SHOULD)。</p>
+<p>エンドポイントは、ストリームが終了した後しばらくの間、ストリームの優先度状態を保持すべきです (SHOULD)。長く状態が保持されると、低確率でストリームが不正に割り当てられたり、デフォルトの優先度が割り当てられたりしてしまいます。</p>
+<p>これはエンドポイントに大規模な状態保持を負わせる可能性があるため、この状態は制限されてもよいものとします (MAY)。エンドポイントは、状態保持の制限を目的として優先度状態を追跡するための終了済みのストリーム数に、固定の上限を設定してもよいものとします (MAY)。エンドポイントが管理する追加の状態量は負荷に依存する可能性があります。高負荷時では、リソースのコミットメントを制限するために優先度の状態を破棄できます。極端なケースでは、エンドポイントは有効なストリームや予約済みストリームの優先度も破棄できます。固定の上限が適用された場合、エンドポイントは少なくとも SETTINGS_MAX_CONCURRENT_STREAMS で許可されたストリームよりも多くの状態を保持すべきです (SHOULD)。</p>
+<p>終了したストリームの優先度を変更する PRIORITY フレームを受信したエンドポイントは、十分な状態を保持しているのであれば、そのストリームに依存するストリームの重みを変更すべきです (SHOULD)。</p>
+
+<h4 id="section5-3-5">5.3.5. デフォルト優先度</h4>
+<p>優先度情報の提供は任意です。ストリームはストリーム0x0への依存に割り当てられます。プッシュストリーム (<a href="#section8-2">8.2節</a>) は関連付けられたストリームに依存します。どちらの場合も、ストリームにはデフォルトの重み16が割り当てられます。</p>
+
+<h3 id="section5-4">5.4. エラー処理</h3>
+<p>HTTP/2 の枠組みにおいては、2種類のエラーを認めています:</p>
+<ul>
+<li>コネクションが完全に使用不可能であることを示すエラー状態はコネクションエラーです。</li>
+<li>個別のストリームにおけるエラーはストリームエラーです。</li>
+</ul>
+<p>エラーコードのリストは<a href="#section7">7章</a>にあります。</p>
+
+<h4 id="section5-4-1">5.4.1. コネクションエラー処理</h4>
+<p>コネクションエラーとは、フレーミングレイヤーの処理の妨げとなるエラーや、接続状態を破壊するエラーです。</p>
+<p>コネクションエラーが発生したエンドポイントは、ピアから受信に成功した最後のストリームIDと共に GOAWAY フレーム (<a href="#section6-8">6.8節</a>) を最初に送信するべきです (SHOULD)。GOAWAY フレームにはコネクションが終了した理由を示すエラーコードが含まれます。GOAWAY フレームの送信後、エンドポイントは TCP 接続を終了しなければなりません (MUST)。</p>
+<p>GOAWAY は受信側エンドポイントで期待通りに受信されない可能性があります。コネクションエラーが発生した場合、GOAWAY はコネクションが終了した理由をベストエフォートでピアに対して伝えるだけです。</p>
+<p>エンドポイントはいつでもコネクションを終了することができます。特にエンドポイントは、ストリームエラーをコネクションエラーとして扱えます (MAY)。状況が許す限り、エンドポイントはコネクションを終了するときに GOAWAY フレームを送信するべきです (SHOULD)。</p>
+
+<h4 id="section5-4-2">5.4.2. ストリームエラー処理</h4>
+<p>ストリームエラーは、他のストリームの処理には影響しない、特定のストリームIDに関連するエラーです。</p>
+<p>ストリームエラーを検知したエンドポイントは、エラーが発生したストリームのストリームIDを含む RST_STREAM フレーム (<a href="#section6-4">6.4節</a>) を送信します。また、RST_STREAM フレームはエラーの種類を示すエラーコードも含みます。</p>
+<p>RST_STREAM は、エンドポイントがそのストリーム上で送信できる最後のフレームです。RST_STREAM を送信するピアは、リモートピアによってすでに送信されたフレーム、または送信のためにキューに入れられたどんなフレームも受信する準備をしなければなりません (MUST)。これらのフレームは、(ヘッダー圧縮のために維持される状態 (<a href="#section4-3">4.3節</a>) のように) 接続状態を変更するフレームを除いて、無視できます。</p>
+<p>通常、エンドポイントは任意のストリームに対して複数の RST_STREAM フレームを送信するべきではありません (SHOULD NOT)。しかしながら、ラウンドトリップ時間が経過した後に終了したストリームに対してフレームを受信した場合には、追加の RST_STREAM フレームを送信してもよいものとします (MAY)。この振る舞いは、不正な実装に対処するために認められます。</p>
+プを防ぐためエンドポイントは、 RST_STREAM フレームの応答に RST_STREAM を送信してはいけません (MUST NOT)。</p>
+
+<h4 id="section5-4-3">5.4.3. コネクションの終了</h4>
+<p>ストリームが開かれている間、または half closed 状態の間に TCP 接続が破壊された場合、エンドポイントはストリームが異常終了し、不完全な状態にあると見なさなければなりません (MUST)。</p>
+</div>
+
+<div class="section">
+<h2 id="section6">6. フレーム定義</h2>
+<p>この仕様では、一意な8ビットのタイプコードで識別される、いくつかのフレームタイプを定義します。各フレームタイプは、全体的なコネクションや個々のストリームの確立と管理について、それぞれ異なる目的を果たします。</p>
+<p>特定のフレームタイプの送信は、コネクションの状態を変更できます。エンドポイントの両方が接続状態を同期し続けることに失敗した場合、そのコネクションにおいてこれ以上正常な通信をすることはできません。したがって、エンドポイントは特定のフレームを使用することで、状態にどのような影響を与えるかの共通理解を持つことが重要です。</p>
+
+<h3 id="section6-1">6.1. DATA</h3>
+<p>DATA フレーム (type=0x0) は、ストリームに関連する任意の可変長オクテット列を転送します。HTTP リクエストまたはレスポンスのペイロードを伝えるために、1つ以上の DATA フレームが使用されます。</p>
+<p>DATA フレームは任意のパディングを含んでもよいものとします (MAY)。パディングは DATA フレームのメッセージサイズを隠すために追加できます。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Pad High? (8) |  Pad Low? (8) |
++---------------+---------------+-------------------------------+
+|                            Data (*)                         ...
++---------------------------------------------------------------+
+|                           Padding (*)                       ...
++---------------------------------------------------------------+
+
+                      DATA フレームペイロード
+</pre>
+<p>DATA フレームは以下のフィールドを含みます:</p>
+<dl>
+  <dt>Pad High</dt>
+  <dd>256オクテット単位でパディングの量を表す8ビットのフィールドです。このフィールドは任意であり、PAD_HIGH フラグが設定された場合にのみ存在します。このフィールドは、Pad Low と組み合わせることで、フレームに含まれるパディングの量を決定します。</dd>
+  <dt>Pad Low</dt>
+  <dd>1オクテット単位でパディングの量を表す8ビットのフィールドです。このフィールドは任意であり、PAD_LOW フラグが設定された場合にのみ存在します。このフィールドは Pad High と組み合わせることで、フレームに含まれるパディングの量を決定します。</dd>
+  <dt>Data</dt>
+  <dd>アプリケーションデータ。フレームペイロードから、存在する他のフィールドの長さを引いた後の残りがデータの量になります。</dd>
+  <dt>Padding</dt>
+  <dd>アプリケーションにとって意味のある値を含まないパディングオクテットです。パディングオクテットは送信時には0を設定し、受信時には無視しなければなりません (MUST)。</dd>
+</dl>
+<p>DATA フレームは以下のフラグを定義します:</p>
+<dl>
+  <dt>END_STREAM (0x1)</dt>
+  <dd>ビット1は、エンドポイントが特定のストリームに送信する最後のフレームであることを示します。このフラグを設定することで、ストリームはいずれかの &quot;half closed&quot; 状態または &quot;closed&quot; 状態 (<a href="#section5-1">5.1節</a>) に遷移します。</dd>
+  <dt>END_SEGMENT (0x2)</dt>
+  <dd>ビット2は、フレームが現在のセグメントの最後のフレームであることを示します。中継者はセグメントの境界を超えてフレームを結合してはいけません (MUST NOT)。また、フレームを転送する際にセグメントの境界を維持しなければなりません。</dd>
+  <dt>PAD_LOW (0x8)</dt>
+  <dd>ビット4は、Pad Low フィールドが設定されていることを示します。</dd>
+  <dt>PAD_HIGH (0x10)</dt>
+  <dd>ビット5は、Pad High フィールドが設定されていることを示します。このビットは PAD_LOW フラグの設定なしに設定されてはいけません (MUST NOT)。PAD_HIGH が設定され PAD_LOW が未設定のフレームを受信したエンドポイントは、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+  <dt>COMPRESSED (0x20)</dt>
+  <dd>ビット6はフレーム内のデータが GZIP 圧縮 (<a href="#GZIP">[GZIP]</a>) で圧縮されていることを示します。</dd>
+</dl>
+<p>DATA フレームはストリームに関連付けられなければなりません (MUST)。Stream Identifier フィールドが0x0の DATA フレームを受信した場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) で応答しなければなりません (MUST)。</p>
+<p>DATA フレームは必要に応じて GZip 圧縮 <a href="#GZIP">[GZIP]</a> を使用して圧縮されます。各フレームは個別に圧縮され、各フレームごとに圧縮状態は初期化されます。</p>
+<p>SETTINGS_COMPRESS_DATA 設定に1が設定されていない、つまり有効にされていない場合、エンドポイントは COMPRESSED フラグが設定された DATA フレームを送信してはいけません (MUST NOT)。DATA フレーム圧縮を有効にしていないエンドポイントは、COMPRESSED フラグが設定された DATA フレームの受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+<p>DATA フレームはフロー制御の対象となり、ストリームが &quot;open&quot; または &quot;half closed (remote)&quot; 状態の問にのみ送信できます。パディングはフロー制御に含まれます。&quot;open&quot; または &quot;half closed (local)&quot; 状態にないストリームから DATA フレームを受信した場合は、受信者は STREAM_CLOSED のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) で応答しなければなりません (MUST)。</p>
+<p>パディングオクテットの合計は、Pad High フィールドに256を乗算した値に Pad Low フィールドの値を加算した値です。Pad High と Pad Low の両方のフィールドが空の場合は0とみなします。パディングの長さが、フレームペイロードの残りの長さよりも大きい場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+<p class="note">注: 値が0の Pad Low フィールドを含めることで、フレームを1オクテット大きくできます。</p>
+<p>パディングの使用はセキュリティのための機能です。そのため、使用には注意が必要です。<a href="#section10-7">10.7節</a>を参照してください。</p>
+
+<h3 id="section6-2">6.2. HEADERS</h3>
+<p>HEADERS フレーム (type=0x1) は名前-値のペアを転送します。これはストリームの開始 (<a href="#section5-1">5.1節</a>) に使用されます。HEADERS フレームは &quot;open&quot; または &quot;half closed (remote)&quot; 状態のストリームに送信できます。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Pad High? (8) |  Pad Low? (8) |
++-+-------------+---------------+-------------------------------+
+|E|                 Stream Dependency? (31)                     |
++-+-------------+-----------------------------------------------+
+|  Weight? (8)  |
++-+-------------+-----------------------------------------------+
+|                   Header Block Fragment (*)                 ...
++---------------------------------------------------------------+
+|                           Padding (*)                       ...
++---------------------------------------------------------------+
+
+                    HEADERS フレームペイロード
+</pre>
+<p>HEADERS フレームのペイロードは以下のフィールドを含みます:</p>
+<dl>
+  <dt>Pad High</dt>
+  <dd>パディングサイズの上位ビットです。このフィールドは PAD_HIGH フラグが設定された場合にのみ存在します。</dd>
+  <dt>Pad Low</dt>
+  <dd>パディングサイズの下位ビットです。このフィールドは PAD_LOW フラグが設定された場合にのみ存在します。</dd>
+  <dt>E</dt>
+  <dd>ストリームの依存関係の排他を示す1ビットのフラグです。<a href="#section5-3">5.3節</a>を参照してください。このフィールドは任意であり、PRIORITY フラグが設定された場合にのみ存在します。</dd>
+  <dt>Stream Dependency</dt>
+  <dd>31ビットの依存先ストリームのストリームIDです。<a href="#section5-3">5.3節</a>を参照してください。このフィールドは任意であり、PRIORITY フラグが設定された場合にのみ存在します。</dd>
+  <dt>Weight</dt>
+  <dd>8ビットのストリームに対する重みです。<a href="#section5-3">5.3節</a>を参照してください。この値に1を加えた値が1から256までの重みとなります。このフィールドは任意であり、PRIORITY フラグが設定された場合にのみ存在します。</dd>
+  <dt>Header Block Fragment</dt>
+  <dd>ヘッダーブロックフラグメント (<a href="#section4-3">4.3節</a>)。</dd>
+  <dt>Padding</dt>
+  <dd>パディングオクテット。</dd>
+</dl>
+<p>HEADERS フレームは以下のフラグを定義します:</p>
+<dl>
+  <dt>END_STREAM (0x1)</dt>
+  <dd>ビット1が設定されると、エンドポイントが特定のストリームに送信する最後のヘッダーブロック (<a href="#section4-3">4.3節</a>) であることを示します。このフラグを設定することで、ストリームはいずれかの &quot;half closed&quot; 状態 (<a href="#section5-1">5.1節</a>) に遷移します。</dd>
+  <dd>CONTINUATION フレームが後に続く HEADERS フレームは、ストリームの終了を知らせる END_STREAM フラグを転送します。CONTINUATION フレームは、ストリームを終了するために使用することはできません。</dd>
+  <dt>RESERVED (0x2)</dt>
+  <dd>ビット2は将来的な使用のために予約されます。</dd>
+  <dt>END_HEADERS (0x4)</dt>
+  <dd>ビット3は、このフレームの後には CONTINUATION フレームが続かず、このフレームに完全なヘッダーブロック (<a href="#section4-3">4.3節</a>) が含まれていることを示します。</dd>
+  <dd>END_HEADERS フラグが設定されていない HEADERS フレームの後には、同一ストリームに CONTINUATION フレームが続かなければなりません (MUST)。受信者は、他の種類のフレームや異なるストリームでのフレームの受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+  <dt>PAD_LOW (0x8)</dt>
+  <dd>ビット4は、Pad Low フィールドが設定されていることを示します。</dd>
+  <dt>PAD_HIGH (0x10)</dt>
+  <dd>ビット5は、Pad High フィールドが設定されていることを示します。このビットは PAD_LOW フラグの設定なしに設定されてはいけません (MUST NOT)。PAD_HIGH が設定され PAD_LOW が未設定のフレームを受信したエンドポイントは、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+  <dt>PRIORITY (0x20)</dt>
+  <dd>ビット6は Exclusive Flag (E)、Stream Dependency、Weight フィールドが設定されていることを示します。<a href="#section5-3">5.3節</a>を参照してください。</dd>
+</dl>
+<p>HEADERS フレームのペイロードは、ヘッダーブロックフラグメント (<a href="#section4-3">4.3節</a>) を含みます。HEADERS フレームに収まらないヘッダーブロックは CONTINUATION フレーム (<a href="#section6-10">6.10節</a>) に分割されなければなりません。</p>
+<p>HEADERS フレームはストリームに関連付けられなければなりません (MUST)。受信した HEADERS フレームの Stream Identifier フィールドが0x0であった場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>HEADERS フレームは、<a href="#section4-3">4.3節</a>で定義されたように接続状態を変更します。</p>
+<p>HEADERS フレームは任意のパディングを含みます。Padding フィールドと関連するフラグは DATA フレーム (<a href="#section6-1">6.1節</a>) における定義と全く同じです。</p>
+
+<h3 id="section6-3">6.3. PRIORITY</h3>
+<p>PRIORITY フレーム (type=0x2) は、送信者からのストリーム優先度 (<a href="#section5-3">5.3節</a>) を指定します。このフレームは既存のストリームに対していつでも送信でき、既存のストリームの優先付けを可能にします。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|E|                  Stream Dependency (31)                     |
++-+-------------+-----------------------------------------------+
+|   Weight (8)  |
++-+-------------+
+
+                    PRIORITY フレームペイロード
+</pre>
+<p>PRIORITY フレームのペイロードは、以下のフィールドを含みます:</p>
+<dl>
+  <dt>E</dt>
+  <dd>ストリームの依存関係の排他を示す1ビットのフラグです。<a href="#section5-3">5.3節</a>を参照してください。</dd>
+  <dt>Stream Dependency</dt>
+  <dd>31ビットの依存先ストリームのストリームIDです。<a href="#section5-3">5.3節</a>を参照してください。</dd>
+  <dt>Weight</dt>
+  <dd>8ビットの指定されたストリームに対する重みです。<a href="#section5-3">5.3節</a>を参照してください。この値に1を加えた値が1から256までの重みとなります。</dd>
+</dl>
+<p>PRIORITY フレームはフラグを定義しません。</p>
+<p>PRIORITY フレームは既存のストリームに関連付けられます。ストリームIDが0x0の PRIORITY フレームを受信した場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>PRIORITY フレームは、&quot;reserved (remote)&quot;、&quot;open&quot;、&quot;half-closed (local)&quot;、または &quot;half closed (remote)&quot; のいずれかの状態のストリームに送信できます。ただし、1つのヘッダーブロック (<a href="#section4-3">4.3節</a>)を構成する連続したフレームの間での送信はできません。このフレームは、処理の完了後やフレーム送信後に受信されることもあり、そのため何も影響を与えない可能性があることに注意してください。&quot;half closed (remote)&quot; 状態にあるストリームでは、このフレームはストリームの処理にのみ影響し、ストリームの送信には影響を与えません。</p>
+
+<h3 id="section6-4">6.4. RST_STREAM</h3>
+<p>RST_STREAM フレーム (type=0x3) はストリームの異常終了を可能にします。ストリームの作成者がこのフレームを送信した場合は、ストリームのキャンセルを要求しているか、エラー状態にあることを示します。ストリームの受信者が送信した場合は、ストリームのキャンセルを要求しているか、エラー状態にあることにより、受信者がストリームを拒否していることを示します。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Error Code (32)                        |
++---------------------------------------------------------------+
+
+                    RST_STREAM フレームペイロード
+</pre>
+<p>RST_STREAM フレームはエラーコード (<a href="#section7">7章</a>) を明確にする符号なし32ビット整数を1つ含みます。このエラーコードは、ストリームが終了した理由を示します。</p>
+<p>RST_STREAM フレームはフラグを定義しません。</p>
+<p>RST_STREAM フレームは関連するストリームを完全に終了し、closed 状態に遷移させます。
+RST_STREAM をストリーム上で受信した後に、受信者はそのストリームに対して追加のフレームを送信してはいけません (MUST NOT)。しかしながら、RST_STREAM を送信した後でも、送信側エンドポイントは、RST_STREAM が到着する前にピアが 送信したかもしれない追加のフレームを受信し、処理する準備をしなければなりません (MUST)。</p>
+<p>RST_STREAM フレームはストリームに関連付けられなければなりません (MUST)。受信した RST_STREAM フレームの Stream Identifier フィールドが0x0であった場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>RST_STREAM フレームは &quot;idle&quot; 状態のストリームに送信してはいけません (MUST NOT)。&quot;idle&quot; 状態のストリームに関連する RST_STREAM フレームを受信した場合は、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+
+<h3 id="section6-5">6.5. SETTINGS</h3>
+<p>SETTINGS frame (type=0x4) は、エンドポイントの通信方法に影響を与える設定パラメーター (環境設定やピアの振る舞いに関する制約など) を転送し、それらのパラメーターの受信確認にも使用されます。SETTINGS パラメーターはそれぞれが「設定」としても呼ばれます。</p>
+<p>SETTINGS パラメーターはネゴシエートされません。これらは送信側ピアが特性を記述し、受信側ピアによって使用されます。また、それぞれのピアから、同一のパラメーターに対して異なる値が通知されます。例えば、クライアントは高い初期フロー制御ウインドウを設定するかもしれませんが、サーバーはリソースを節約するために低い値を設定するかもしれません。</p>
+<p>SETTINGS フレームは、コネクション開始時に両方のエンドポイントから送信されなければなりません (MUST)。また、接続中はいかなる時でもいずれかのエンドポイントから送信してもよいものとします (MAY)。実装は、この仕様に定義されている全てのパラメーターをサポートしなければなりません (MUST)。</p>
+<p>SETTINGS フレームの各パラメーターは、そのパラメーターの既存の値を置き換えます。パラメーターは登場した順序で処理され、SETTINGS フレームの受信者は現在のパラメーター値以外の状態を維持する必要はありません。したがって SETTINGS パラメーターの値は受信者が最後に処理した値になります。</p>
+<p>SETTINGS パラメーターは受信したピアにより確認されます。これを有効にするため、SETTINGS フレームは以下のフラグを定義します:</p>
+<dl>
+  <dt>ACK (0x1)</dt>
+  <dd>ビット1が設定されると、フレームの受信を確認し、ピアの SETTINGS フレームを適用したことを示します。このビットが設定された時、SETTINGS フレームのペイロードは空でなければなりません (MUST)。ACK フラグが設定され、Length フィールドの値が 0 以外になっている SETTINGS フレームの受信は、FRAME_SIZE_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。より詳しい情報は、設定の同期 (<a href="#section6-5-3">6.5.3節</a>) を参照してください。</dd>
+</dl>
+<p>SETTINGS フレームは、1つのストリームではなく、コネクションに対して常に適用されます。SETTINGS フレームのストリームIDは0でなければなりません (MUST)。Stream Identifier フィールドに0x0以外の値が設定された SETTINGS フレームを受信した場合、エンドポイントは PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>SETTINGS フレームは接続状態に影響します。不正な形式や不完全な SETTINGS フレームは、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱われなければなりません (MUST)。</p>
+
+<h4 id="section6-5-1">6.5.1. SETTINGS フォーマット</h4>
+<p>SETTINGS フレームのペイロードは0個以上のパラメーターからなります。各パラメーターは、8ビットの識別子、そして符号なし32ビットの設定値からなります。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Identifier (8)|
++---------------+-----------------------------------------------+
+|                        Value (32)                             |
++---------------------------------------------------------------+
+
+                        設定フォーマット
+</pre>
+
+<h4 id="section6-5-2">6.5.2. 定義済みの SETTINGS パラメーター</h4>
+<p>定義済みの設定は以下の通りです:</p>
+<dl>
+  <dt>SETTINGS_HEADER_TABLE_SIZE (1)</dt>
+  <dd>送信者が、リモートエンドポイントがヘッダーブロックのデコードに使用するヘッダー圧縮テーブルのサイズを通知することを可能にします。エンコーダーは、ヘッダーブロック内における特定のヘッダー圧縮フォーマットを通知することで、このサイズを減らすことができます。デフォルトの値は4,096バイトです。</dd>
+  <dt>SETTINGS_ENABLE_PUSH (2)</dt>
+  <dd>この設定はサーバープッシュ (8.2節) を無効化するために使用できます。この値が0になっているパラメーターを受信した場合、エンドポイントは PUSH_PROMISE フレームを送信してはいけません (MUST NOT)。このパラメーターに0を設定し、その応答が受けたエンドポイントは、PUSH_PROMISE フレームの受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません(MUST)。</dd>
+  <dd>初期値は1であり、これはプッシュが許可されていることを示します。0または1ではない値は全て、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません。<dd>
+  <dt>SETTINGS_MAX_CONCURRENT_STREAMS (3)</dt>
+  <dd>送信者が許可する同時ストリームの最大数を示します。この制限は方向性を持ち、送信者が受信者に作成を許可するストリームの数に適用されます。初期状態ではこの値は無制限になっています。並列性の不要な制限をしないために、この値は100以下にしないことをおすすめします。</dd>
+  <dd>値が0の SETTINGS_MAX_CONCURRENT_STREAMS を、エンドポイントは特別な値として扱うべきではありません (SHOULD NOT)。0の値は新しいストリームの生成を防ぎます。しかしながらこのような状況は、どんな制限をしていても、アクティブストリームによる枯渇によって発生する可能性があります。サーバーは短期間の間にのみ0の値を設定すべきです (SHOULD)。サーバーがリクエストを受け付けたくないような場合には、接続を終了するほうがより適しています。</dd>
+  <dt>SETTINGS_INITIAL_WINDOW_SIZE (4)</dt>
+  <dd>ストリームレベルのフロー制御のための、送信者の初期ウインドウサイズ (バイト) を示します。初期値は65,535です。</dd>
+  <dd>この設定は、既存のストリームを含む、全てのストリームのウインドウサイズに影響します。<a href="#section6-9-2">6.9.2節</a>を参照してください。</dd>
+  <dd>フロー制御ウインドウサイズの最大値である2^31 - 1を超える値は FLOW_CONTROL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません。</dd>
+  <dt>SETTINGS_COMPRESS_DATA (5)</dt>
+  <dd>この設定は、DATA フレームの GZip 圧縮を有効にするために使用します。</dd>
+  <dd>値1は DATA フレームが圧縮されていてもよい (MAY) ことを示します。値0は圧縮が許可されていないことを示します。初期値は0です。</dd>
+  <dd>0または1以外の値は不正です。エンドポイントは、不正な値の受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+</dl>
+<p>この他の識別子を含む SETTINGS フレームを受信したエンドポイントは、それを PROTOCOL_ERROR のコネクションエラー (5.4.1節) として扱わなければなりません。</p>
+
+<h3 id="section6-5-3">6.5.3. 設定の同期</h3>
+<p>ほとんどの SETTINGS 値にとって、いつピアが変更するパラメーター値を受信し､その値を適応したかを知ることはメリットになり、そうなることが求められます。このような同期点を提供するために、ACK フラグが設定されていない SETTINGS フレームの受信者は、受信後に更新されたパラメーターを可能な限り早く適用しなければなりません (MUST)。</p>
+<p>SETTINGS フレームの値は、出現した順序で適用されなければなりません (MUST)。複数の SETTING 値を適応する間に他のフレームの処理してはいけません。全ての値を適用後、受信者は ACK フラグを設定した SETTINGS フレームをすぐに送信しなければなりません (MUST)。ACK フラグが設定された SETTINGS フレームを受信すると、パラメーターを変更した送信者はアプリケーションに依存できます。</p>
+<p>SETTINGS フレームの送信者が妥当な時間に応答を受信しなかった場合、SETTINGS_TIMEOUT のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答してもよいものとします (MAY)。</p>
+
+<h3 id="section6-6">6.6. PUSH_PROMISE</h3>
+<p>PUSH_PROMISE フレーム (type=0x5) は、送信者が開始する予定のストリームを事前にピアエンドポイントに通知するために使用します。PUSH_PROMISE フレームは、エンドポイントがストリームに追加のコンテキストを提供するヘッダーセットと共に、作成する予定のストリームの符号なし31ビット識別子を含みます。PUSH_PROMISE フレームの使用についての完全な説明は、<a href="#section8-2">8.2節</a>に記述されています。</p>
+<p>ピアエンドポイントの SETTINGS_ENABLE_PUSH 設定が0に設定された場合、PUSH_PROMISE を送信してはいけません (MUST NOT)。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Pad High? (8) | Pad Low? (8)  |
++-+-------------+---------------+-------------------------------+
+|R|                  Promised Stream ID (31)                    |
++-+-----------------------------+-------------------------------+
+|                   Header Block Fragment (*)                 ...
++---------------------------------------------------------------+
+|                           Padding (*)                       ...
++---------------------------------------------------------------+
+
+                  PUSH_PROMISE ペイロードフォーマット
+</pre>
+<p>PUSH_PROMISE フレームのペイロードは、以下のフィールドを含みます:</p>
+<dl>
+  <dt>Pad High</dt>
+  <dd>パディングサイズの上位ビットです。このフィールドは PAD_HIGH フラグが設定された場合にのみ存在します。</dd>
+  <dt>Pad Low</dt>
+  <dd>パディングサイズの下位ビットです。このフィールドは PAD_LOW フラグが設定された場合にのみ存在します。</dd>
+  <dt>R</dt>
+  <dd>予約済みビットです。</dd>
+  <dt>Promised Stream ID</dt>
+  <dd>エンドポイントがフレームの送信を開始する予定のストリームを識別するための符号なし31ビット整数です。予約済みストリームIDは、送信者が次に送信するストリームとして有効なものでなければなりません (MUST) (新しいストリームID (<a href="#section5-1-1">5.1.1節</a>) を参照してください)。</dd>
+  <dt>Header Block Fragment</dt>
+  <dd>リクエストヘッダーフィールドを含むヘッダーブロックフラグメント (<a href="#section4-3">4.3節</a>) です。</dd>
+  <dt>Padding</dt>
+  <dd>パディングオクテット</dd>
+</dl>
+<p>PUSH_PROMISE フレームは以下のフラグを定義します:</p>
+<dl>
+  <dt>END_HEADERS (0x4)</dt>
+  <dd>ビット3は、このフレームの後には CONTINUATION フレームが続かず、このフレームに完全なヘッダーブロック (<a href="#section4-3">4.3節</a>) が含まれていることを示します。</dd>
+  <dd>END_HEADERS フラグが設定されていない PUSH_PROMISE フレームの後には、同一ストリームに CONTINUATION フレームが続かなければなりません (MUST)。受信者は、他の種類のフレームや異なるストリームでのフレームの受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+  <dt>PAD_LOW (0x08)</dt>
+  <dd>ビット4は、Pad Low フィールドが設定されていることを示します。</dd>
+  <dt>PAD_HIGH (0x10)</dt>
+  <dd>ビット5は、Pad High フィールドが設定されていることを示します。このビットは PAD_LOW フラグの設定なしに設定されてはいけません (MUST NOT)。PAD_HIGH が設定され PAD_LOW が未設定のフレームを受信したエンドポイントは、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+</dl>
+<p>PUSH_PROMISE フレームは既存のピアが開始したストリームに関連付けられなければなりません (MUST)。PUSH_PROMISE フレームのストリームIDは、そのストリームが関連付けられたものであることを示します。ストリームIDフィールドに0x0を指定した場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>予約済みストリームは、予約した順番で使用する必要はありません。PUSH_PROMISE は今後使用するストリームIDのみを予約します。</p>
+<p>PUSH_PROMISE フレームの受信者は、PUSH_PROMISE の送信者に予約済みストリームIDを参照する RST_STREAM を送信することで、予約済みストリームを拒否できます。</p>
+<p>PUSH_PROMISE フレームは、<a href="#section4-3">4.3節</a>で定義されているように接続状態を変更します。</p>
+<p>PUSH_PROMISE フレームは2つの方法で接続状態を変更します。ヘッダーブロック (<a href="#section4-3">4.3節</a>)を含めることは、ヘッダー圧縮のために保持されている状態を変更する可能性があります。PUSH_PROMISE は、予約済みストリームを &quot;reserved&quot; 状態に遷移させることで、今後使用するストリームを予約します。送信者は、&quot;open&quot; または &quot;half closed (remote)&quot; のいずれかの状態ではないストリームには PUSH_PROMISE を送信してはいけません (MUST NOT)。また、送信者は予約済みストリームが新しいストリームID (<a href="#section5-1-1">5.1.1節</a>) を正しく選択していることも保証しなければなりません (MUST) (これはつまり、予約済みストリームは &quot;idle&quot; 状態でなければなりません (MUST))。</p>
+<p>PUSH_PROMISE はストリームを予約するため、PUSH_PROMISE フレームを無視することは、ストリームの状態を不安定にさせる原因となります。受信者は &quot;open&quot; や &quot;half-closed (local)&quot; でないストリームでの PUSH_PROMISE への応答は、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。同様に、受信者は不正なストリームID (<a href="#section5-1-1">5.1.1節</a>) (これはつまり、現在 &quot;idle&quot; 状態でないストリームのIDを指します) を予約する PUSH_PROMISE への応答も、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+<p>PUSH_PROMISE フレームは任意のパディングを含みます。Padding フィールドと関連するフラグは DATA フレーム (<a href="#section6-1">6.1節</a>) における定義と全く同じです。</p>
+
+<h3 id="section6-7">6.7. PING</h3>
+<p>PING フレーム (type=0x06) は、アイドル中のコネクションがまだ機能しているかどうかを確認するだけでなく、送信者からの往復遅延時間も計測するための仕組みです。PING フレームはどちらのエンドポイントも送信できます。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                      Opaque Data (64)                         |
+|                                                               |
++---------------------------------------------------------------+
+
+                    PING ペイロードフォーマット
+</pre>
+<p>PING フレームは、フレームヘッダーに加え、ペイロードに8オクテットのデータを含まなければなりません (MUST)。送信者はペイロードに任意の値を選択して含めることができ、任意の方法でそれらのバイトを使用できます。</p>
+<p>ACK フラグを含まない PING フレームの受信者は、そのレスポンスとして、同じペイロードと共に ACK フラグを設定した PING フレームを送信しなければなりません (MUST)。PING レスポンスは他のフレームよりも高い優先度が設定されるべきです (SHOULD)。</p>
+<p>PING フレームは以下のフラグを定義します:</p>
+<dl>
+  <dt>ACK (0x1)</dt>
+  <dd>ビット1は、この PING フレームが PING レスポンスであることを示します。エンドポイントは PING レスポンスに対してはこのフラグを設定しなければなりません (MUST)。 また、エンドポイントはこのフラグを含む PING フレームには応答してはいけません (MUST NOT)。</dd>
+</dl>
+<p>PING フレームは個別のストリームには関連付けられません。ストリームIDフィールドの値が0x0でない PING フレームを受信した場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>長さフィールドの値が8になっていない PING フレームの受信者は、FRAME_SIZE_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+
+<h3 id="section6-8">6.8. GOAWAY</h3>
+<p>GOAWAY フレーム (type=0x7) は、リモートピアがコネクションにおけるストリームの作成を終了することを伝えます。GOAWAY フレームはクライアントとサーバーのどちらからでも送信できます。このフレームが送信されると、送信者は現在のコネクションに残っている新しいストリームに対して送信されたフレームを無視します。GOAWAY フレームの受信者は、現在のコネクション上で新しい追加のストリームを開始してはいけません (MUST NOT)。しかし、新しいストリームを生成するために新しくコネクションを確立できます。このフレームの目的は、以前確立したストリームの処理を終了している間であっても、(おそらく、再起動やメンテナンスのために) エンドポイントが新しいストリームの受け入れを適切に停止できるようにすることです。</p>
+<p>新しくストリームを開始したエンドポイントと、GOAWAY フレームを送信したリモートの間には、固有の競合状態があります。このような場合に対処するため、GOAWAY は現在のコネクションで送信側エンドポイントが最後に処理したストリームIDを含みます。GOAWAY の受信者が、指定されたストリームIDよりも新しいストリームを使用していた場合、送信者でそのストリームの処理は行われず、受信者はそのストリームを作成されなかったストリームとして扱うことになります (したがって、受信者は新しいコネクションでそのストリームを再生成しようとするかもしれません)。</p>
+<p>ストリームが部分的に処理されたのかどうかを、リモートが知ることができるよう、エンドポイントはコネクションを終了する前に、常に GOAWAY フレームを送信するべきです (SHOULD)。例えば、ある HTTP クライアントが、サーバーがコネクションを終了するのと同時に POST を送信した場合に、サーバーが処理を中止したことを示す GOAWAY フレームを送信しなければ、クライアントはサーバーが POST リクエストの処理を開始したのかどうかを知ることができません。不正なピアに対しては、エンドポイントは GOAWAY の送信なしにコネクションを終了することを選ぶかもしれません。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|R|                  Last-Stream-ID (31)                        |
++-+-------------------------------------------------------------+
+|                      Error Code (32)                          |
++---------------------------------------------------------------+
+|                  Additional Debug Data (*)                    |
++---------------------------------------------------------------+
+
+                    GOAWAY ペイロードフォーマット
+</pre>
+<p>GOAWAY フレームはフラグを定義しません。</p>
+<p>GOAWAY フレームは特定のストリームではなく、コネクションに対して適用されます。エンドポイントはストリームIDが0x0以外の値になっている GOAWAY フレームを PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+<p>GOAWAY の最終ストリームIDには、GOAWAY フレームの送信者がフレームを受信し、何らかの動作をおこなったストリームのうち、最も大きい値のストリームIDが含まれます。このストリームIDまでのストリームは全て、すでに何らかの方法で処理された可能性があります。処理されたストリームが存在しない場合は、最終ストリームIDに0が設定される可能性があります。</p>
+<p class="note">注: この文脈における &quot;処理された&quot; とはストリームのデータが、何らかの動作をするかもしれない上位レイヤーのソフトウェアに渡された結果を意味します。</p>
+<p>GOAWAY フレームの送信なしにコネクションを終了した場合は、この値は事実上もっとも大きい値のストリームIDになります。</p>
+<p>指定された値と等しいまたはそれ以下のIDを持つストリームのうち、コネクションが終了する前に完全に終了されていないストリームでは、リクエストの再試行やトランザクション、その他のプロトコル処理ができません (HTTP GET、PUT、DELETE のような冪等な動作を除く)。指定された値よりも大きいIDのストリームを使用するプロトコル処理は、新しいコネクションを使用して安全に再実行できます。</p>
+<p>最終ストリームIDの値と等しいかまたはそれ以下のIDを持つストリームでの処理は、正常に完了する可能性があります。GOAWAY フレームの送信者は、処理中のストリームが全て完了するまで open 状態でコネクションを維持し、GOAWAY フレームを送信することで適切にコネクションを終了するかもしれません。</p>
+<p>状況の変化に応じて、エンドポイントは複数の GOAWAY フレームを送信してもよいものとします (MAY)。例えば、自動シャットダウン中に NO_ERROR と共に GOAWAY を送信したエンドポイントは、その後、接続の即時終了を必要とする状況に陥る可能性があります。最後に受信した GOAWAY フレームから最終ストリームIDが適用されます。</p>
+<p>GOAWAY フレームの送信後、送信者は最終ストリームに指定したIDよりも大きいIDを持つストリームのフレームを破棄することができます。しかしながら、接続状態を変更するフレームは完全には無視されません。例えば、HEADERS、PUSH_PROMISE、CONTINUATION フレームは、矛盾のないヘッダー圧縮の状態 (<a href="#section4-3">4.3節</a>) を保証するために、最低限処理されなければなりません (MUST)。同様に、DATA フレームはコネクションフロー制御ウインドウに対して計算されなければなりません (MUST)。これらのフレームの処理に失敗すると、フロー制御やヘッダー圧縮の状態が同期されない可能性があります。</p>
+<p>GOAWAY フレームは、コネクションを終了する理由を示す32ビットのエラーコード (<a href="#section7">7章</a>) も含みます。</p>
+<p>エンドポイントは、GOAWAY フレームのペイロードに未定義のデータを追加してもよいものとします (MAY)。デバッグ情報にはセキュリティやプライバシーに関わるデータを含めることができます。記録されていたり、永続的に格納されているデバッグデータは、不正なアクセスを防ぐために適切な保護手段を持たなければなりません (MUST)。</p>
+
+<h3 id="section6-9">6.9. WINDOW_UPDATE</h3>
+<p>WINDOW_UPDATE フレーム (type=0x8) フロー制御を実行するために使用されます。概要については<a href="#section5-2">5.2節</a>を参照してください。</p>
+<p>フロー制御は、個々のストリームとコネクション全体の2段階でおこなわれます。</p>
+<p>どちらの段階のフロー制御もホップ間、つまり2つのエンドポイントの間でのみおこなわれます。中継者は繋がっているコネクションの間で WINDOW_UPDATE フレームを転送しません。しかしながら受信者がデータ転送をスロットリングすることによって、元の送信者に対してフロー制御情報を間接的に伝搬させることができます。</p>
+<p>フロー制御は、フロー制御の対象となる特定のフレームにのみ適用されます。この文書に定義されるフレームの種類のうち、対象となるのは DATA フレームのみです。フロー制御の対象でないフレームは、受信者がフレームを処理するためのリソースの割り当てに失敗しない限り、受け入れ、処理されなければなりません (MUST)。フレームの受け入れに失敗した場合、受信者はストリームエラー (<a href="#section5-4-2">5.4.2節</a>) または FLOW_CONTROL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答してもよいものとします (MAY)。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|R|              Window Size Increment (31)                     |
++-+-------------------------------------------------------------+
+
+              WINDOW_UPDATE ペイロードフォーマット
+</pre>
+<p>WINDOW_UPDATE フレームのペイロードは、1つの予約ビットと、既存のフロー制御ウインドウに加えて送信者が送信可能なバイト数を示す、符号なし31ビットの整数からなります。フロー制御ウインドウの増加量として認められる範囲は、1から2^31 - 1 (0x7fffffff) バイトです。</p>
+<p>WINDOW_UPDATE フレームはフラグを定義しません。</p>
+<p>WINDOW_UPDATE フレームは、ストリームやコネクションを特定できます。ストリームの場合、フレームのストリームIDが対象のストリームを示し、コネクションの場合は、ストリームID &quot;0&quot; がこのフレームの対象がコネクション全体であることを示します。</p>
+<p>WINDOW_UPDATE は、END_STREAM フラグを設定したフレームを送信したピアから送信できます。これは、受信者が &quot;half closed (remote)&quot; や &quot;closed&quot; 状態のストリームで WINDOW_UPDATE フレームを受信できることを意味します。受信者はこれをエラーとして扱ってはいけません (MUST NOT)。詳しくは<a href="#section5-1">5.1節</a>を参照してください。</p>
+<p>フロー制御下のフレームを受信した受信者は、受信者がコネクションエラー (<a href="#section5-4-1">5.4.1節</a>)として扱わない限り、常にコネクションフロー制御ウインドウへの影響を考慮しなければなりません (MUST)。この考慮はフレームにエラーがある場合であっても必要です。送信者はフロー制御ウィンドウに対してフレームを計算しているため、受信者がこれをおこなわなければ、送信者と受信者のフロー制御ウインドウに差異が発生する可能性があります。</p>
+
+<h4 id="section6-9-1">6.9.1. フロー制御ウインドウ</h4>
+<p>HTTP/2 におけるフロー制御は、各ストリームの送信者ごとに保持されるウインドウを使用することで実装されます。フロー制御ウインドウは、送信者が送信可能なデータのバイト数を示す、シンプルな整数値です。このサイズは、受信者のバッファ容量を計測したサイズでもあります。</p>
+<p>ストリームフロー制御ウインドウと、コネクションフロー制御ウインドウの2つのフロー制御ウインドウが適用されます。送信者は、受信者から告知されたいずれかのフロー制御ウインドウで、使用可能な容量を超える長さのフロー制御下にあるフレームを送信してはいけません (MUST NOT)。いずれかのフロー制御ウインドウに使用可能な容量がない場合は、END_STREAM フラグが設定された長さが0のフレーム (例えば、空の DATA フレーム) を送信してもよいものとします (MAY)。</p>
+<p>フロー制御の計算対象には、8バイトのフレームヘッダーは含まれません。</p>
+<p>フロー制御下のフレームを送信後、送信者は2つのウインドウの使用可能な容量から、送信したフレームの長さ分を減少させます。</p>
+<p>フレームの受信者はデータを処理し、フロー制御ウインドウの容量を開放して、WINDOW_UPDATE フレームを送信します。ストリームレベルとコネクションレベルのフロー制御ウインドウのために、WINDOW_UPDATE フレームは分割されて送信されます。</p>
+<p>WINDOW_UPDATE フレームを受信した送信者は、フレームに指定された容量を使用して、関連するウインドウを更新します。</p>
+<p>送信者は、2^31 - 1 バイトを超えるフロー制御ウインドウを許可してはいけません (MUST NOT)。送信者がこの最大容量を超えるフロー制御ウインドウが指定された WINDOW_UPDATE を受信した場合は、ストリームまたはコネクションのいずれか適切な方を終了しなければなりません (MUST)。ストリームにおいては　FLOW_CONTROL_ERROR のエラーコードと共に RST_STREAM を、コネクションにおいては FLOW_CONTROL_ERROR と共に GOAWAY フレームを送信者は送信します。</p>
+<p>送信者からのフロー制御下のフレームと、受信者からの WINDOW_UPDATE フレームは、お互いに完全に非同期です。この特性は、ストリームの停止するのを防ぎ、送信者が保持するウインドウサイズを受信者が積極的に更新することを可能にします。</p>
+<p>フロー制御ウインドウが0以下になったためにストリームにデータを送信できない送信者は、潜在的なフロー制御の問題を受信者に通知するために BLOCKED フレーム (<a href="#section6-12">6.12節</a>) を送信してもよいものとします (MAY)。</p>
+
+<h4 id="section6-9-2">6.9.2. 初期フロー制御ウインドウサイズ</h4>
+<p>HTTP/2 接続が最初に確立された時に、65,535バイトの初期フロー制御ウインドウサイズと共に新しいストリームが作成されます。コネクションフロー制御ウインドウは65,535バイトになります。どちらのエンドポイントも、コネクションプリフェイスの一部として、SETTINGS フレームに SETTINGS_INITIAL_WINDOW_SIZE の値を含めることで、新しいストリームのための初期ウインドウサイズを調整できます。コネクションフロー制御ウインドウの初期サイズは変更できません。</p>
+<p>SETTINGS_INITIAL_WINDOW_SIZE の値が設定された SETTINGS フレームを受信する前に、フロー制御下のフレームを送信する場合は、エンドポイントはデフォルトの初期ウインドウサイズのみを使用できます。同様に、WINDOW_UPDATE フレームを受信するまでは、コネクションフロー制御ウインドウにはデフォルトの初期ウインドウサイズが設定されます。</p>
+<p>SETTINGS フレームは、現在の全てのストリームの初期フロー制御ウインドウサイズを変更できます。SETTINGS_INITIAL_WINDOW_SIZE の値が変更された時は、受信者は新しい値と古い値の差分を維持し、全てのストリームのフロー制御ウインドウサイズを調整しなければなりません (MUST)。SETTINGS フレームはコネクションフロー制御ウインドウを変更できません。</p>
+<p>エンドポイントは、フロー制御ウインドウが最大サイズを超えるような SETTINGS_INITIAL_WINDOW_SIZE の変更を FLOW_CONTROL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+<p>SETTINGS_INITIAL_WINDOW_SIZE の変更は、フロー制御ウインドウの使用可能な容量を負の値にする可能性があります。送信者は負の値のフロー制御ウインドウに従わなければならず (MUST)、フロー制御ウインドウが正の値になる WINDOW_UPDATE フレームを受信するまで、新しいフロー制御下のフレームを送信してはいけません (MUST NOT)。</p>
+<p>例えば、クライアントがコネクション確立と同時に60KBを送信し、サーバーが初期ウインドウサイズを16KBに設定した場合、クライアントは SETTINGS フレームの受信時に、使用可能なフロー制御ウインドウを-44KBに再計算します。クライアントは、WINDOW_UPDATE フレームがウインドウを正の値に戻すまで、負の値のフロー制御ウインドウを保持します。ウインドウが正の値に戻った後に、クライアントは送信を再開します。</p>
+
+<h4 id="section6-9-3">6.9.3. ストリームウインドウサイズの減少</h4>
+<p>現在のサイズよりも少ないフロー制御ウインドウの使用を要求する受信者は、新しい SETTINGS フレームを送信できます。しかしながら、送信者は SETTINGS フレームを処理する前に、変更後の制限を超えるデータを送信した可能性があるため、受信者は変更後のウインドウサイズを超えるデータの受信に備えなければなりません (MUST)。</p>
+<p>初期フロー制御ウインドウサイズを減少させる SETTINGS フレームの送信後、受信者にはフロー制御の制限を超えたストリームの処理について、2つの選択肢があります:</p>
+<ol>
+  <li>受信者は、対象のストリームに対して直ちに FLOW_CONTROL_ERROR エラーと共に RST_STREAM を送信できます。</li>
+  <li>受信者は、そのストリームを受け入れ、その結果として生じる行頭ブロッキングを許容し、データを消費した結果として WINDOW_UPDATE フレームを送信できます。</li>
+</ol>
+
+<h3 id="section6-10">6.10. CONTINUATION</h3>
+<p>CONTINUATION フレーム (type=0x9) は連続するヘッダーブロックフラグメントの続きに使用されます (<a href="#section4-3">4.3節</a>)。同一ストリームの直前のフレームが END_HEADERS が設定されていない HEADERS、PUSH_PROMISE、または CONTINUATION である限り、任意の数の CONTINUATION フレームを既存のストリームに送信できます。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Pad High? (8) | Pad Low? (8)  |
++---------------+---------------+-------------------------------+
+|                   Header Block Fragment (*)                 ...
++---------------------------------------------------------------+
+|                           Padding (*)                       ...
++---------------------------------------------------------------+
+
+                  CONTINUATION フレームペイロード
+</pre>
+<p>CONTINUATION フレームは以下のフィールドを含みます:</p>
+<dl>
+  <dt>Pad High</dt>
+  <dd>パディングサイズの上位ビットです。このフィールドは PAD_HIGH フラグが設定された場合にのみ存在します。</dd>
+  <dt>Pad Low</dt>
+  <dd>パディングサイズの下位ビットです。このフィールドは PAD_LOW フラグが設定された場合にのみ存在します。</dd>
+  <dt>Header Block Fragment</dt>
+  <dd>ヘッダーブロックフラグメント (<a href="#section4-3">4.3節</a>)。</dd>
+  <dt>Padding</dt>
+  <dd>パディングオクテット。</dd>
+</dl>
+<p>CONTINUATION フレームは以下のフラグを定義します:</p>
+<dl>
+  <dt>END_HEADERS (0x4)</dt>
+  <dd>ビット3は、ヘッダーブロック (<a href="#section4-3">4.3節</a>) がこのフレームで終わることを示します。</dd>
+  <dd>END_HEADERS ビットが設定されない場合、このフレームの後には他の CONTINUATION フレームが続かなければなりません。受信者は、他の種類のフレームや異なるストリームでのフレームの受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+  <dt>PAD_LOW (0x8)<dt>
+  <dd>ビット4は、Pad Low フィールドが設定されていることを示します。</dd>
+  <dt>PAD_HIGH (0x10)<dt>
+  <dd>ビット5は、Pad High フィールドが設定されていることを示します。このビットは PAD_LOW フラグの設定なしに設定されてはいけません (MUST NOT)。PAD_HIGH が設定され PAD_LOW が未設定のフレームを受信したエンドポイントは、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
+</dl>
+<p>CONTINUATION フレームのペイロードはヘッダーブロックフラグメントを含みます (<a href="#section4-3">4.3節</a>)。</p>
+<p>CONTINUATION フレームは<a href="#section4-3">4.3節</a>で定義されるように接続状態を変更します。</p>
+<p>CONTINUATION フレームはストリームに関連付けられなければなりません (MUST)。ストリームIDフィールドの値が0x0になっている CONTINUATION フレームを受信した場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>CONTINUATION フレームは、END_HEADERS フラグが設定されていない HEADERS、PUSH_PROMISE、または CONTINUATION フレームの後に続いてなければなりません (MUST)。このルールへの違反を検知した受信者は、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として応答しなければなりません (MUST)。</p>
+<p>CONTINUATION フレームは任意のパディングを含みます。Padding フィールドと関連するフラグは DATA フレーム (<a href="#section6-1">6.1節</a>) における定義と全く同じです。</p>
+
+<h3 id="section6-11">6.11. ALTSVC</h3>
+<p>ALTSVC フレーム (type=0xA) はクライアントに代替サービスの提供を告知します。このフレームはクライアントが開始した既存のストリームやストリーム0に対していつでも送信され、負荷分散やその他のトラフィック分割をサーバーができるようにする意図があります。詳細は <a href="#ALT-SVC">[ALT-SVC]</a> (特に、2.4節の代替サービスのクライアント処理の概要) を参照してください。</p>
+<p>クライアントが開始したストリーム上の ALTSVC フレームは、転送された代替サービスはそのストリームのオリジンに関連付けられていることを示します。</p>
+<p>ストリーム0上の ALTSVC フレームは、転送された代替サービスはフレームの Origin フィールドに含まれるオリジンに関連付けられていることを示します。クライアントが現在の接続を信頼できないとみなしたオリジンとの関連については、無視しなければなりません (MUST)。</p>
+<pre> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Max-Age (32)                         |
++-------------------------------+---------------+---------------+
+|            Port (16)          | Reserved (8)  | Proto-Len (8) |
++-------------------------------+---------------+---------------+
+|                        Protocol-ID (*)                        |
++---------------+-----------------------------------------------+
+| Host-Len (8)  |                   Host (*)                  ...
++---------------+-----------------------------------------------+
+|                          Origin? (*)                        ...
++---------------------------------------------------------------+
+
+                    ALTSVC フレームペイロード
+</pre>
+<p>ALTSVC フレームは、以下のフィールドを含みます:</p>
+<dl>
+  <dt>Max-Age</dt>
+  <dd><a href="#ALT-SVC">[ALT-SVC]</a>、2.2節にあるように、関連する代替サービスの有効時間を示す符号なし32ビット整数です。</dd>
+  <dt>Port</dt>
+  <dd>代替サービスが提供されているポートを示す符号なし16ビット整数です。</dd>
+  <dt>Reserved</dt>
+  <dd>将来的に使用します。送信者はこのビットに '0' を指定しなければならず (MUST)、受信者はこれを無視しなければなりません (MUST)。</dd>
+  <dt>Proto-Len</dt>
+  <dd>Protocol-ID フィールドのオクテットの長さを示す符号なし8ビット整数です。</dd>
+  <dt>Protocol-ID</dt>
+  <dd>代替サービスの ALPN プロトコル識別子を含むバイト列です (長さは &quot;Proto-Len&quot; で決定されます)。</dd>
+  <dt>Host-Len<dt>
+  <dd>Host フィールドのオクテットの長さを示す符号なし8ビット整数です。</dd>
+  <dt>Host</dt>
+  <dd>代替サービスを提供するホストを示す ASCII 文字列を含む文字の配列です (長さは &quot;Host-Len&quot; で決定されます)。国際化ドメイン名 <a href="#IDNA">[IDNA]</a> はA-ラベルを使用して表現されなければなりません (MUST)。</dd>
+  <dt>Origin</dt>
+  <dd>代替サービスが適用されるオリジンの ASCII シリアライゼーション (<a href="#RFC6454">[RFC6454]</a>、6.2節) を含む文字の配列 (長さはフレームの長さから前述した全てのフィールドの長さを引いた値で決定されます) です。このフィールドは任意です。</dd>
+</dl>
+<p>ALTSVC フレームはフラグを定義しません。</p>
+<p>ALTSVC フレームはクライアントによる受信を意図しているため、ALTSVC フレームを受信したサーバーは、その受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+<p>ALTSVC フレームはホップ間で処理されます。中継者は自身のクライアントに送信する新しい ALTSVC フレームを生成する際に、ALTSVC フレームに含まれる情報を使用できますが、ALTSVC フレーム自体を転送してはいけません (MUST NOT)。</p>
+
+<h3 id="section6-12">6.12. BLOCKED</h3>
+<p>BLOCKED フレーム (type=0xB) は、フロー制御ウインドウが閉じられているため、送信者がデータを送信できないことを示します。</p>
+<p>[[anchor12: BLOCKED フレームは実験を容易にするためにこのドラフトに含まれています。実験の結果として肯定的なフィードバックが得られなければ、削除される可能性があります。]]</p>
+<p>BLOCKED フレームは、パフォーマンスチューニングやデバッグを目的として、フロー制御のパフォーマンスに関するフィードバックを提供するために使用されます。BLOCKED フレームは、コネクションまたはストリームレベルのフロー制御が原因でフロー制御下のデータが送信できない時に、ピアから送信される可能性があります。利用可能なデータの不足や、下層のトランスポートがブロックされているといった、データの送信を妨げる他の理由がある場合は、このフレームが送信されてはいけません (MUST NOT)。</p>
+<p>BLOCKED フレームはブロックされているストリーム、つまりフロー制御ウインドウの利用可能なバイト数が正の値になっていないストリーム上に送信されます。BLOCKED フレームは、コネクションレベルのフロー制御がブロックされていることを示すために、ストリーム0x0上でも送信される可能性があります。</p>
+<p>エンドポイントは、影響を受けるフロー制御ウインドウが正の値になるまで、連続した BLOCKED フレームを送信してはいけません (MUST)。これは、さらに BLOCKED フレームが送信される前に、WINDOW_UPDATE フレームを受信するか、SETTINGS_INITIAL_WINDOW_SIZE が増加することを意味します。</p>
+<p>BLOCKED フレームではフラグを定義せず、ペイロードもありません。受信者は、ペイロードのある BLOCKED フレームの受信を FRAME_SIZE_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+</div>
+
+<div class="section">
+<h2 id="section7">7. エラーコード</h2>
+<p>エラーコードは、ストリームやコネクションのエラー理由を伝えるために RST_STREAM と GOAWAY フレームで使用される32ビットのフィールドです。</p>
+<p>エラーコードは共通のコード領域を共有します。一部のエラーコードは特定の状況にのみ適用され、いくつかのフレームタイプにおいては意味が定義されません。</p>
+<p>以下のエラーコードが定義されます:</p>
+<dl>
+<dt>NO_ERROR (0)</dt>
+<dd>関連する状態は、エラーの結果ではありません。例えば、GOAWAY はコネクションが適切に終了することを示すためにこのコードを含むかもしれません。</dd>
+<dt>PROTOCOL_ERROR (1)</dt>
+<dd>エンドポイントが不特定のエラーを検知しました。このエラーは明確なエラーコードが提供されていない時に使用されます。</dd>
+<dt>INTERNAL_ERROR (2)</dt>
+<dd>エンドポイントで予期せぬ内部エラーが発生しました。</dd>
+<dt>FLOW_CONTROL_ERROR (3)</dt>
+<dd>エンドポイントがピアのフロー制御プロトコル違反を検知しました。</dd>
+<dt>SETTINGS_TIMEOUT (4)</dt>
+<dd>エンドポイントが SETTINGS フレームを送信したものの、適切な時間内にそのレスポンスを受信しませんでした。設定の同期 (<a href="#section6-5-3">6.5.3節</a>) を参照してください。</dd>
+<dt>STREAM_CLOSED (5)</dt>
+<dd>エンドポイントが half closed のストリームからフレームを受信しました。</dd>
+<dt>FRAME_SIZE_ERROR (6)</dt>
+<dd>エンドポイントが対応する最大サイズよりも大きいフレームを受信しました。</dd>
+<dt>REFUSED_STREAM (7)</dt>
+<dd>エンドポイントがアプリケーション処理をする前にストリームを拒否しました。詳細は<a href="#section8-1-3">8.1.3節</a>を参照してください。</dd>
+<dt>CANCEL (8)<dt>
+<dd>ストリームが必要がなくなったことを示すために、エンドポイントが使用します。</dd>
+<dt>COMPRESSION_ERROR (9)<dt>
+<dd>エンドポイントがコネクションのための圧縮コンテキストの維持に失敗しました。</dd>
+<dt>CONNECT_ERROR (10)</dt>
+<dd>CONNECT リクエスト (<a href="#section8-3">8.3節</a>) に応じて確立された接続が、リセットまたは不正終了しました。</dd>
+<dt>ENHANCE_YOUR_CALM (11)</dt>
+<dd>ピアが、さらなるフレーム処理の拒否を引き起こす挙動を一定時間にわたって示したことをエンドポイントが検出しました。</dd>
+<dt>INADEQUATE_SECURITY (12)</dt>
+<dd>下位のトランスポートがこの文書 (<a href="#section9-2">9.2節</a>) やエンドポイントの最低必要条件を満たしていません。</dd>
+</dl>
+</div>
+
+<div class="section">
+<h2 id="section8">8. HTTP メッセージの交換</h2>
+<p>HTTP/2 は現在使用している HTTP に可能な限り互換であることを目指しています。これは、サーバーやクライアントアプリケーションの観点から、プロトコルの機能を変更しないことを意味します。これを実現することで、転送される構文のセマンティクスは変更されるものの、全てのアプリケーションのリクエストとレスポンスヘッダーのセマンティクスは保たれます。</p>
+<p>したがって、HTTP/1.1 セマンティクスの仕様や要件、コンテンツ <a href="#HTTP-p2">[HTTP-p2]</a>、条件付きリクエスト <a href="#HTTP-p4">[HTTP-p4]</a>、範囲リクエスト <a href="#HTTP-p5">[HTTP-p5]</a>、キャッシュ <a href="#HTTP-p6">[HTTP-p6]</a> と認証 <a href="#HTTP-p7">[HTTP-p7]</a> は HTTP/2 に適用できます。HTTP や HTTPS URI スキームのような HTTP/1.1 メッセージ構文とルーティング <a href="#HTTP-p1">[HTTP-p1]</a> の一部も HTTP/2 に適用できますが、このプロトコル専用のセマンティクスの表現は、以降の節で定義されます。</p>
+
+<h3 id="section8-1">8.1. HTTP リクエスト/レスポンスの交換</h3>
+<p>クライアントは、過去に使用していないストリームID (<a href="#section5-1-1">5.1.1節</a>) を使用して、新しいストリーム上で HTTP リクエストを送信します。サーバーはリクエストと同一のストリーム上で HTTP レスポンスを送信します。</p>
+<p>HTTP メッセージ (リクエストやレスポンス) はそれぞれ以下のフレームから成ります:</p>
+<ol>
+  <li>1つの HEADERS フレームと、それに続く0個以上の CONTINUATION フレーム (メッセージヘッダーを含みます。<a href="#HTTP-p1">[HTTP-p1]</a>、3.2節)</li>
+  <li>0個以上の DATA フレーム (メッセージペイロードを含みます。<a href="#HTTP-p1">[HTTP-p1]</a>、3.3節)</li>
+  <li>任意で、1つの HEADERS フレームと、それに続く0個以上の CONTINUATION フレーム (存在する場合は Trailer 部を含みます。<a href="#HTTP-p1">[HTTP-p1]</a>、4.1.2節)</li>
+</ol>
+<p>これら一連のフレームの最後のフレームは END_STREAM フラグを持ちます。END_STREAM フラグを持つ HEADERS フレームの後には、残りのヘッダーブロックの一部を転送する CONTINUATION フレームが続くことができます。<p>
+<p>(任意のストリームからの) その他のフレームは、HEADERS フレームとの後に続く CONTINUATION フレーム (存在する場合) や、CONTINUATION フレームの間に存在してはいけません (MUST NOT)。</p>
+<p>他の状態であれば、フレームはストリーム上のこれらのフレームの間に点在してもよいものとします (MAY)。しかし、そのようなフレームは HTTP のセマンティクスを転送しません。特に、この一連のフレームの最初と任意である最後のフレーム以外の HEADERS フレーム (とその後の CONTINUATION フレーム) は HTTP のセマンティクスを転送しません。</p>
+<p>他のフレームは、これらのフレームと交互に送受信してもよいものとします (MAY)。しかし、そのようなフレームは HTTP のセマンティクスを転送しません。特に、この一連のフレームの最初と任意な最後のフレーム以外の HEADERS フレーム (とその後の CONTINUATION フレーム) は HTTP のセマンティクスを転送しません。</p>
+<p>Trailing ヘッダーフィールドはストリームを終了するヘッダーブロックにより転送されます。すなわち、END_STREAM フラグを持つ HEADERS フレームで始まり、0個以上の CONTINUATION フレームが続く、一連のフレームです。ストリームを終了しない最初のヘッダーブロックの後のヘッダーブロックは HTTP リクエストやレスポンスの一部ではありません。</p>
+<p>HTTP リクエスト/レスポンスの交換は1つのストリームを完全に消費します。リクエストは、ストリームを &quot;open&quot; 状態にする HEADERS フレームで開始され、クライアントのストリームを &quot;half closed&quot; 状態にする END_STREAM が設定されたフレームで終了します。レスポンスは HEADERS フレームで開始され、ストリームを &quot;closed&quot; 状態にする END_STREAM が設定されたフレームで終了します。また、その後に CONTINUATION フレームが後に続く場合があります。</p>
+
+<h4 id="section8-1-1">8.1.1. 情報提供レスポンス</h4>
+<p>HTTP レスポンスステータスコードの 1xx 系 (<a href="#HTTP-p2">[HTTP-p2]</a>、6.2節) は HTTP/2 ではサポートされません。</p>
+<p>1xx の最も一般的なユースケースは、クライアントが最終的なレスポンスステータスコードではない 100 (Continue) を期待することを示す &quot;100-continue&quot; トークン (一般的に &quot;Expect/continue&quot; と呼ばれています) を伴う Except ヘッダーフィールドの使用です。このトークンの受信は、もしリクエストボディの送信が完了していないのであれば、クライアントはその送信を継続しなければならないことを示します。</p>
+<p>一般的に Expect/continue は、クライアントがリクエストボディで巨大なデータを送信して、結局リクエストがオリジンサーバーに拒否されてしまう (つまり使用不能になる可能性がある接続を残す) ことを避けたい時に使用されます。</p>
+<p>HTTP/2 は Expect/continue のメカニズムを有効にしません。すなわち、サーバーが最終的にリクエストを拒否するステータスコードを送信する場合でも、コネクションを使用不可にさせることなくリクエストを続けることができます。</p>
+<p>これはリクエストボディを送信する HTTP/2 クライアントが、リクエストが拒否される場合でも、データの送信に少なくとも1ラウンドトリップを浪費してしまうことを意味します。帯域が制限されたクライアントは、最終的なステータスコードを見越して、最初のラウンドトリップのデータ送信量を抑制することでこれを軽減できます。</p>
+<p>この他に定義された 1xx ステータスコードも、HTTP/2 には適用されません。例えば、101 (Switching Protocols) のセマンティクスは多重化されたプロトコルに適していません。同様に、HTTP/2 ではコネクションを維持していることの意味がこれまでと異なっているため、102 (Processing) はもう必要ありません。</p>
+<p>このプロトコルバージョン間の違いによって、それらを変換する中継者は次のような特別な処理を必要とします。</p>
+<ul>
+  <li>HTTP/1.1 から HTTP/2 へのゲートウェイとなる中継者は、&quot;100-continue&quot; トークンを伴う Expect ヘッダーフィールド (<a href="#HTTP-p2">[HTTP-p2]</a>、5.1.1節) を含むリクエストを受信した場合、最終的なステータスコードをすぐに生成できない限り 100 (Continue) レスポンスを生成しなければなりません (MUST)。中継者は、リクエストヘッダーフィールドに &quot;100-continue&quot; の expectation (Expectヘッダ値)を HTTP/2 へ転送してはいけません (MUST NOT)。</li>
+  <li>HTTP/2 から HTTP/1.1 へのゲートウェイとなる中継者は、リクエストボディを持つリクエストを転送する際に、&quot;100-continue&quot; を見越して Expect ヘッダーフィールドを追加してもよいものとします (MAY)。具体的な要件については、<a href="#HTTP-p2">[HTTP-p2]</a> の5.1.1節を参照してください。</li>
+  <li>HTTP/2 から HTTP/1.1 へのゲートウェイとなる中継者は、この他の 1xx 情報提供レスポンスを全て破棄しなければなりません (MUST)。</li>
+</ul>
+
+<h4 id="section8-1-2">8.1.2. 例</h4>
+<p>この節では、HTTP/1.1 リクエストとレスポンスに相当する、HTTP/2 のリクエストとレスポンスの例を示します。</p>
+<p>リクエストヘッダーフィールドを含み、ボディがない HTTP GET リクエストは、リクエストヘッダーフィールドのシリアライズされたブロックを含む、HEADERS フレームとそれに続く0個以上の CONTINUATION フレームとして転送されます。以下の HEADERS フレームは END_HEADERS と END_STREAM の両方のフラグが設定され、CONTINUATION フレームは送信されません:</p>
+<pre>GET /resource HTTP/1.1         HEADERS
+Host: example.org        ==>     + END_STREAM
+Accept: image/jpeg               + END_HEADERS
+                                   :method = GET
+                                   :scheme = https
+                                   :path = /resource
+                                   host = example.org
+                                   accept = image/jpeg
+</pre>
+<p>同様に、レスポンスヘッダーフィールドを含むレスポンスも、レスポンスヘッダーフィールドのシリアライズされたブロックを含む、HEADERS フレーム (とそれに続く0個以上の CONTINUATION フレーム) として転送されます。</p>
+<pre>HTTP/1.1 304 Not Modified        HEADERS
+ETag: &quot;xyzzy&quot;              ==>     + END_STREAM
+Expires: Thu, 23 Jan ...           + END_HEADERS
+                                     :status = 304
+                                     etag: "xyzzy"
+                                     expires: Thu, 23 Jan ...
+</pre>
+<p>リクエストヘッダーフィールドとペイロードデータを含む HTTP POST リクエストは、リクエストヘッダーフィールドを含む 1つの HEADER フレームとその後に続く、0個以上の CONTINUATION フレーム、さらにその後に続く1つ以上の DATA フレームとして転送されます。最後の CONTINUATION　(または HEADERS) フレームには、END_HEADERS フラグが設定され、最後の DATA フレームには END_STREAM フラグが設定されます。</p>
+<pre>POST /resource HTTP/1.1          HEADERS
+Host: example.org          ==>     - END_STREAM
+Content-Type: image/jpeg           - END_HEADERS
+Content-Length: 123                  :method = POST
+                                     :path = /resource
+{binary data}                        content-type = image/jpeg
+
+                                 CONTINUATION
+                                   + END_HEADERS
+                                     :authority = example.org
+                                     :scheme = https
+                                     content-length = 123
+
+                                 DATA
+                                   + END_STREAM
+                                 {binary data}
+</pre>
+<p>任意のヘッダーフィールドを提供するデータは、ヘッダーブロックフラグメントに分割されることに注意してください。この例における、ヘッダーフィールドのフレームへの割り当ては、単純な説明向のものになっています。</p>
+<p>ヘッダーフィールドとペイロードデータを含むレスポンスは、1つ以上の HEADERS フレームとそれに続く、0個以上の CONTINUATION フレーム、さらにその後に続く1つ以上の DATA フレームとして転送されます。最後の DATA フレームには END_STREAM フラグが設定されます。</p>
+<pre>HTTP/1.1 200 OK                HEADERS
+Content-Type: image/jpeg  ==>    - END_STREAM
+Content-Length: 123              + END_HEADERS
+                                   :status = 200
+{binary data}                      content-type = image/jpeg
+                                   content-length = 123
+
+                               DATA
+                                 + END_STREAM
+                                   {binary data}
+</pre>
+<p>Trailing ヘッダーフィールドは、リクエストやレスポンスヘッダーブロックと、全ての DATA フレームが送信された後に、ヘッダーブロックとして送信されます。トレイラーヘッダーブロックを開始する HEADERS フレームには END_STREAM フラグが設定されます。</p>
+<pre>HTTP/1.1 200 OK                  HEADERS
+Content-Type: image/jpeg   ==>     - END_STREAM
+Transfer-Encoding: chunked         + END_HEADERS
+Trailer: Foo                         :status        = 200
+                                     content-length = 123
+123                                  content-type   = image/jpeg
+{binary data}                        trailer        = Foo
+0
+Foo: bar                         DATA
+                                   - END_STREAM
+                                 {binary data}
+
+                                 HEADERS
+                                   + END_STREAM
+                                   + END_HEADERS
+                                     foo: bar
+</pre>
+
+<h4 id="section8-1-3">8.1.3. HTTP ヘッダーフィールド</h4>
+<p>HTTP ヘッダーフィールドは一連のキーと値のペアとして情報を転送します。登録済み HTTP ヘッダーのリストについては、&lt;<a href="http://www.iana.org/assignments/message-headers">http://www.iana.org/assignments/message-headers</a>&gt; で整備されている メッセージヘッダーフィールドレジストリを参照してください。</p>
+<p>HTTP/1.x では、対象 URI とリクエストのメソッド、そしてレスポンスのステータスコードを転送するためにメッセージ start-line を使用していましたが、HTTP/2 では、&quot;:&quot; で始まる特殊な擬似ヘッダーを使用します。</p>
+<p>HTTP/1.x のようにヘッダーフィールド名は、大文字小文字を区別しない方法で比較される ASCII の文字列です。しかしながら HTTP/2 では、ヘッダーフィールド名はエンコード前に小文字に変換されなければなりません (MUST)。大文字のヘッダーフィールド名を含むリクエストやレスポンスは不正な形式 (<a href="#section8-1-3-5">8.1.3.5節</a>) として扱わなければなりません (MUST)</p>
+<p>HTTP/2 は &quot;ホップ・バイ・ホップ&quot; のヘッダーフィールドを示す Connection ヘッダーフィールドを使用しません。このプロトコルでは、接続に固有なメタデータを他の方法で転送します。そのため、Connection を含む HTTP/2 メッセージは不正な形式 (<a href="#section8-1-3-5">8.1.3.5節</a>)として扱われなければなりません (MUST)。</p>
+<p>このことは、HTTP/1.x メッセージを HTTP/2 に変換する中継者が、Connection ヘッダーフィールドとそこで指定されたヘッダーフィールドを削除する必要があることを意味します。このような中継者は、Connectionで指定されていなくてもKeep-Alive、Proxy-Connection、Transfer-Encoding、そして Upgrade といった接続に固有な他のヘッダーフィールドを削除すべきです (SHOULD)。</p>
+<p>これに関する一つの例外は、TE ヘッダーフィールドです。このフィールドは HTTP/2 リクエストに存在してもよい (MAY) ものとしていますが、&quot;trailers&quot; 以外の値を含んではいけません (MUST NOT)。</p>
+<p class="note">注: HTTP/2 は他のプロトコルへのアップグレードを意図的にサポートしません。3章で説明したハンドシェイク方式は、他のプロトコルの使用をネゴシエートするのに十分と考えられています。</p>
+
+<h5 id="section8-1-3-1">8.1.3.1. リクエストヘッダーフィールド</h5>
+<p>HTTP/2 はリクエスト対象の情報を転送するコロン ':' 文字で始まるいくつかのヘッダーフィールドを定義します:</p>
+<ul>
+  <li>&quot;:method&quot; ヘッダーフィールドは、HTTP メソッド (<a href="#HTTP-p2">[HTTP-p2]</a>、4章) を含みます。</li>
+  <li>&quot;:scheme&quot; ヘッダーフィールドは、対象 URI のスキーム部 (<a href="#RFC3986">[RFC3986]</a>、3.1節) を含みます。</li>
+  <li>
+    <p>&quot;:authority&quot; ヘッダーフィールドは、対象 URI の authority 部 (<a href="#RFC3986">[RFC3986]</a>、3.2節) を含みます。authority には、非推奨となった &quot;http&quot; や &quot;https&quot; URI のサブコンポーネントの &quot;userinfo&quot; を含めてはいけません (MUST NOT)。</p>
+    <p>HTTP/1.1 リクエスト行を正確に再現できることを保証するために、origin や asterisk 形式 (<a href="#HTTP-p1">[HTTP-p1]</a>、5.3節) のリクエストターゲットを持つ HTTP/1.1 リクエストから変換するときには、このヘッダーフィールドは省略されなければなりません (MUST)。HTTP/2 リクエストを直接生成するクライアントは、代わりに &quot;Host&quot; ヘッダーフィールドを省略するべきです (SHOULD)。HTTP/2 リクエストを HTTP/1.1 に変換する中継者は、&quot;Host&quot; ヘッダーフィールドが存在しない場合は、&quot;:authority&quot; ヘッダーフィールドの値をコピーして &quot;Host&quot; ヘッダーフィールドを生成しなければなりません (MUST)。</p>
+  </li>
+  <li>&quot;:path&quot; ヘッダーフィールドは、対象 URI のパス部とクエリー部 (<a href="#RFC3986">[RFC3986]</a> の &quot;絶対パス&quot; および、クエリーが後に続く任意の '?' 文字、<a href="#RFC3986">[RFC3986]</a>、3.3節と<a href="#RFC3986">[RFC3986]</a>、3.4節) を含みます。このフィールドは空ではいけません (MUST NOT)。パス部を含んでいない URI は、リクエストがアスタリスク形式の OPTIONS リクエストでない限り、'/' の値を含まなければなりません (MUST)。また、'*' に対する OPTIONS リクエストの場合、&quot;:path&quot; ヘッダーフィールドは '*' を含まなければなりません (MUST)。</li>
+</ul>
+<p>全ての HTTP/2 リクエストは、CONNECT リクエスト (8.3節) である場合を除き、&quot;:method&quot;、&quot;:scheme&quot;、そして &quot;:path&quot; ヘッダーフィールドに有効な値を1つ含まなければなりません (MUST)。これらのヘッダーフィールドが省略された HTTP リクエストは不正な形式 (<a href="#section8-1-3-5">8.1.3.5節</a>) です。</p>
+<p>コロンで始まるヘッダーフィールド名は、HTTP/2 コンテキストにおいてのみ有効です。これらは HTTP ヘッダーフィールドではありません。実装は、コロンで始まるヘッダーフィールドを生成させてはいけません (MUST)。また、コロンで始まる任意のヘッダーフィールドを無視しなければなりません。具体的には、コロンで始まる名前のヘッダーフィールドは HTTP ヘッダーフィールドとして外部に露出してはいけません (MUST NOT)。</p>
+<p>HTTP/2 では、HTTP/1.1 のリクエスト行に含まれるバージョン識別子を伝達する方法を定義しません。</p>
+
+<h5 id="section8-1-3-2">8.1.3.2. レスポンスヘッダーフィールド</h5>
+<p>&quot;:status&quot; ヘッダーフィールドは、 HTTP ステータスコードフィールド (<a href="#HTTP-p2">[HTTP-p2]</a>、6節) を伝達するために定義されます。このヘッダーフィールドは全てのレスポンスに含まれなければなりません (MUST) が、これを含まないレスポンスは不正な形式 (<a href="#section8-1-3-5">8.1.3.5節</a>) です。</p>
+<p>HTTP/2 では、HTTP/1.1 のステータス行に含まれるバージョンや理由フレーズを伝達する方法を定義しません。</p>
+
+<h5 id="section8-1-3-3">8.1.3.3. ヘッダーフィールドの順序</h5>
+<p>HTTP ヘッダー圧縮 <a href="#COMPRESSION">[COMPRESSION]</a> はヘッダーフィールドの順序を保持しないため、異なる名前を持つヘッダーフィールドの相対的な順序は重要ではありません。しかしながら、リストを構成するために同一のヘッダーフィールドを繰り返すことができます(<a href="#HTTP-p1">[HTTP-p1]</a>、3.2.2節) 。そのような場合では、ヘッダーフィールドの値の相対的な順序は重要です。
+この繰り返しは、カンマ区切りリストの値を持つ単一のヘッダーフィールド、値を一つ持つ複数のヘッダーフィールド、またはこの組み合わせのいずれかによって発生します。したがって、後者の場合は、順序付けは圧縮がおこなわれる前に保持される必要があります。</p>
+<p>同じ名前のヘッダーフィールドの複数の出現順序を保持するために、順序付けされた値は、ゼロ値オクテット (0x0) を区切り文字に使用して1つの値に結合されます。</p>
+<p>ヘッダー圧縮を解凍した後、値に0のオクテット値 (0x0) を含むヘッダーフィールドは、処理される前に複数のヘッダーフィールドに分割されなければなりません (MUST)。</p>
+<p>例えば、以下の HTTP/1.x ヘッダーブロックは:</p>
+<pre>Content-Type: text/html
+Cache-Control: max-age=60, private
+Cache-Control: must-revalidate
+</pre>
+<p>3つの Cache-Control ディレクティブを含んでいます。2つは最初の Cache-Control ヘッダーフィールドに、最後の1つは2つ目の Cache-Control フィールドにあります。これらは圧縮の前に以下のように変換される必要があります (0x0 は &quot;\0&quot; として表現しています)。</p>
+<pre>cache-control: max-age=60, private\0must-revalidate
+content-type: text/html
+</pre>
+<p>ここでは、Content-Type と Cache-Control の順序は保持されませんが、Cache-Control ディレクティブの相対的な順序は (最初の2つはカンマで区切られ、最後は異なる行にあったように) 保持されることに注意してください。</p>
+<p>ヘッダーフィールドの順序に意味が無いことが知られていない限り、複数の値を含むヘッダーフィールドは1つの値として結合されなければなりません (MUST)。</p>
+<p>カンマ区切りリストで構成されなくとも複数の値を持つことができる &quot;set-cookie&quot; のような特殊な場合では、順序に依存しません。&quot;set-cookie&quot; ヘッダーフィールドは、複数のヘッダーフィールドの値として、もしくは1つの結合された値としてエンコードされてもよいものとします (MAY)。</p>
+
+<h5 id="section8-1-3-4">8.1.3.4. Cookie ヘッダーフィールドの圧縮</h5>
+<p>Cookie ヘッダーフィールド <a href="#COOKIE">[COOKIE]</a> は冗長なデータを大量に運ぶことがあります。</p>
+<p>Cookie ヘッダーフィールドはクッキーペア (もしくは &quot;crumb&quot;) の区切りにセミコロン &quot;;&quot; を使用します。このヘッダーフィールドは、HTTP におけるリスト構造のルール (<a href="#HTTP-p1">[HTTP-p1]</a>、3.2.2節) には従っていません。そしてそれは、クッキーペアが異なる名前-値ペアに分割されることを妨げています。 このため個々のクッキーペアが更新されると、圧縮効率が著しく低下します。</p>
+<p>圧縮効率を向上させるために、Cookie ヘッダーフィールドは1つ以上のクッキーペアを持つ複数のヘッダーフィールドに分割してもよいものとします (MAY)。ヘッダー圧縮を解凍した後に、複数の Cookie ヘッダーフィールドが存在した場合、それらは 0x3B、0x20 (ASCII 文字の &quot;; &quot;) を2つのオクテットの区切り文字として使用して1つの文字列に結合されなければなりません (MUST)。</p>
+<p>Cookie ヘッダーフィールドは、<a href="#section8-1-3-3">8.1.3.3節</a>で定義されたように0のオクテット値 (0x0) を使用して分割されてもよものとします (MAY)。デコード時には、0のオクテット値はクッキーの区切り文字 (&quot;; &quot;) に置き換えられなければなりません (MUST)。</p>
+
+<h4 id="section8-1-3-5">8.1.3.5. 不正な形式のメッセージ</h4>
+<p>不正な形式のリクエストやレスポンスとは、一連の有効な HTTP/2 フレームの使用しているものの、禁止ヘッダーフィールドが存在したり、必須ヘッダーフィールドが存在しない、大文字のヘッダーフィールド名を含んでいるなどの理由で無効となるものです。</p>
+<p>エンティティボディを持つリクエストやレスポンスは &quot;content-length&quot; ヘッダーフィールドを含むことができます。ボディを構成する未圧縮 DATA フレームペイロードの長さの合計が &quot;content-length&quot; ヘッダーフィールドの値と等しくない場合、リクエストやレスポンスは不正な形式となります。</p>
+<p class="note">注: &quot;Content-Length&quot; ヘッダーフィールドには、エンティティボディの長さが設定されます。DATA フレームの圧縮は、エンティティを変更しない HTTP/2 の機能です。</p>
+<p>HTTP のリクエストやレスポンスを処理する中継者 (つまり、トンネルとしては機能しない全ての中継者) は、不正な形式のリクエストやレスポンスを転送してはいけません (MUST NOT)。</p>
+<p>不正な形式のリクエストやレスポンスを検出する実装は、ストリームが終了したことを保証する必要があります。サーバーは不正な形式のリクエストについて、ストリームを終了したり、リセットをする前に HTTP レスポンスを送信してもよいものとします (MAY)。クライアントは不正な形式のレスポンスを受け入れてはいけません (MUST NOT)。</p>
+<p>これらの要件は、HTTP に対する一般的な攻撃手法の一部からの保護を意図していることに注意してください。寛容であることは、実装の脆弱性を晒すことにもなるため、用心深く、厳格でなければなりません。</p>
+
+<h4 id="section8-1-4">8.1.4. HTTP/2 におけるリクエストの信頼性向上メカニズム</h4>
+<p>HTTP/1.1 においてエラーが発生した際は、エラーの原因を特定する手段が存在しないため、HTTP クライアントは冪等でないリクエストの再試行を行うことができませんでした。もしリクエストが再試行されると、エラーが発生する前に進めたサーバー処理が望ましくない結果になってしまう可能性があるでしょう。</p>
+<p>HTTP/2 はリクエストが処理されたことをクライアントに保証するために、2つのメカニズムを提供します:</p>
+<ul>
+  <li>GOAWAY フレームは処理されたであろう最も大きいストリーム番号を示します。したがって、より大きい番号を持つストリーム上のリクエストは、安全に再試行できることが保証されます。</li>
+  <li>いかなる処理が行われるより前にストリームが終了したことを示すために、REFUSED_STREAM エラーコードを RST_STREAM フレームに含めることができます。そのリセットされたストリームに送信されていたリクエストは安全に再試行できます。</li>
+</ul>
+<p>処理されていないリクエストを失敗ではありません。クライアントは冪等でないメソッドであっても、それらを自動的に再施行してもよいものとします (MAY)。</p>
+<p>ストリームが処理されていないという事をサーバーが保証できない限り、サーバーはそのことを示してはいけません (MUST NOT)。ストリーム上にあるフレームがアプリケーションレイヤーに渡された場合、そのストリームに対して REFUSED_STREAM を使用してはいけません (MUST NOT)。そして GOAWAY フレームは、アプリケーションレイヤーに渡されたフレームのストリームID以上の値を含まなければなりません (MUST)。</p>
+<p>これらのメカニズムに加え、PING フレームはクライアントがコネクションを簡単にテストする方法を提供します。いくつかのミドルボックス (例として、ネットワークアドレス変換器やロードバランサーなどがあります) が静かにコネクションを破棄するため、アイドルとして残っているコネクションは破壊されることがあります。PING フレームは、クライアントがリクエストを送信することなく、コネクションが有効かどうかを安全にテストすることを可能にします。</p>
+
+<h3 id="section8-2">8.2. サーバープッシュ</h3>
+<p>HTTP/2 では、単一のリクエストに対するレスポンスにおいて、1つ以上の関連するレスポンスをサーバーがクライアントに先行送信 (または &quot;プッシュ&quot;) することを可能にします。最初のリクエストのレスポンスをクライアントが完全に処理するために、関連するレスポンスを用意する必要があることをサーバーが知っている場合、この機能は特に有益です。</p>
+<p>追加レスポンスのプッシュは任意であり、個々のエンドポイントの間でやり取りされます。サーバープッシュが無効であることを示すために、SETTINGS_ENABLE_PUSH 設定には0を設定できます。</p>
+<p>レスポンスのプッシュはホップ間で有効であり、中継者はサーバーからプッシュされたレスポンスを受信し、クライアントにそれらを転送しないことを選択することができます。言い換えれば、プッシュされたレスポンスをどのように扱うかは、中継者に任されています。中継者は、サーバーによる動作なしに、クライアントに追加のレスポンスをプッシュすることもできます。</p>
+<p>クライアントはプッシュすることはできません。したがって、サーバーは PUSH_PROMISE フレームの受信を PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません。クライアントは、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) としてメッセージを扱うことで、SETTINGS_ENABLE_PUSH 設定を&quot;0&quot;以外の値に変更しようとする試みを拒否しなければなりません (MUST)。</p>
+<p>サーバーはキャッシュ可能 (<a href="#HTTP-p6">[HTTP-p6]</a>、3節) なレスポンスのみをプッシュすることができます。予約リクエストは安全 (<a href="#HTTP-p2">[HTTP-p2]</a>、4.2.1節) でなければならず (MUST)、リクエストボディを含んではいけません (MUST NOT)。</p>
+
+<h4 id="section8-2-1">8.2.1. プッシュリクエスト</h4>
+<p>サーバープッシュは、リクエストに対してサーバーがレスポンスを返すことと意味的に等しくなります。この時のリクエストはサーバーにより PUSH_PROMISE フレームとして送信されます。</p>
+<p>PUSH_PROMISE フレームは、サーバーがリクエストに予想するリクエストヘッダーフィールドの完全なセットからなるヘッダーブロックを含みます。リクエストボディを含むリクエストのレスポンスをプッシュすることは不可能です。</p>
+<p>プッシュリクエストは、常にクライアントからのリクエストに明確に関連付けられます。サーバーから送信される PUSH_PROMISE フレームは、明示的なリクエストのストリーム上に送信されます。PUSH_PROMSE フレームは予約済みストリームIDも含みます。それはサーバーで使用可能なストリームIDから選択されています (<a href="#section5-1-1">5.1.1節</a>)。</p>
+<p>PUSH_PROMISE のヘッダーフィールドと、その後に続く CONTINUATION フレームは、正しく完全なリクエストヘッダーフィールドのセット(<a href="#section8-1-3-1">8.1.3.1節</a>) でなければなりません (MUST)。サーバーは、&quot;:method&quot; ヘッダーフィールドに安全でキャッシュ可能なメソッドを含めなければなりません (MUST)。クライアントが、正しく完全なヘッダーフィールドのセットを含んでいない、または &quot;:method&quot; ヘッダーフィールドのメソッドが安全でない PUSH_PROMISE を受信した場合は、PROTOCOL_ERROR のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として応答しなければなりません (MUST)。</p>
+<p>サーバーは、予約済みレスポンスに関連するどんなフレームを送信するよりも前に、PUSH_PROMISE フレーム (<a href="#section6-6">6.6節</a>) を送信すべきです (SHOULD)。これは、クライアントが PUSH_PROMISE フレームを受信する前に、リクエストを発行するといった競合を防ぎます。</p>
+<p>例えば、サーバーが複数の画像ファイルへのリンクが埋め込まれた文書のリクエストを受信し、サーバーがそれらの画像をクライアントにプッシュすることを選択したとします。このような場合、その画像リンクを含む DATA フレームよりも前に PUSH_PROMISE を送信することで、クライアントがそれらの埋め込みリンクを見つける前に予約を確認できることを保証します。同様に、ヘッダーブロックが参照するリクエスト (例えば、Link ヘッダーフィールドなど) をサーバーがプッシュする場合は、ヘッダーブロックを送信する前に PUSH_PROMISE を送信することで、クライアントがそれらにリクエストしないことを保証します。</p>
+<p>PUSH_PROMISE フレームはクライアントから送信してはいけません (MUST NOT)。PUSH_PROMISE フレームは、クライアントにより開始されたストリーム上にサーバーから送信されます。それらは、サーバーに対して &quot;open&quot; または &quot;half closed (remote)&quot; のいずれかの状態のストリーム上で送信されなければなりません (MUST)。PUSH_PROMISE フレームはレスポンスを構成するフレームの間に入れられますが、1つのヘッダーブロックを構成する HEADERS と CONTINUATION フレームの間に入れ込むことはできません。</p>
+
+<h4 id="section8-2-2">8.2.2. プッシュレスポンス</h4>
+<p>PUSH_PROMISE フレームを送信後、サーバーは予約されたIDのストリーム上でレスポンス (<a href="#section8-1-3-2">8.1.3.2節</a>) と同じ様にプッシュレスポンスを送信し始めることができます。サーバーは、HTTP レスポンスを送信するためにこのストリームを使用します。それは<a href="#section8-1">8.1節</a>で定義された一連のシーケンスを使用しています。このストリームは、初期の HEADERS フレームが送信された後、クライアントに対して &quot;half closed&quot; 状態 (<a href="#section5-1">5.1節</a>) に変わります。</p>
+<p>クライアントが PUSH_PROMISE フレームを受信し、プッシュレスポンスを受け入れることを選択すると、クライアントは予約済みストリームが終了するまで、そのレスポンスに対してリクエストを発行すべきではありません (SHOULD NOT)。</p>
+<p>クライアントが何らかの理由でサーバーからプッシュされたレスポンスの受信を望まないと判断した場合や、サーバーが予約済みレスポンスの送信開始まで時間がかかりすぎる場合には、クライアントは RST_STREAM フレームを送信できます。この RST_STREAM は CANCEL または REFUSED_STREAM コードのいずれかを使用し、予約済みのストリームIDを参照します。</p>
+<p>クライアントは、サーバーから同時にプッシュされるレスポンスの数を制限するために SETTINGS_MAX_CONCURRENT_STREAMS 設定を使用できます。値が0に設定された SETTINGS_MAX_CONCURRENT_STREAMS を告知することで、サーバーが必要とするストリームの生成を防ぎ、サーバープッシュを無効にします。これは、サーバーに PUSH_PROMISE の送信を禁止するわけではありません。その場合、クライアントは必要のない予約済みのストリームをリセットする必要があります。</p>
+<p>プッシュレスポンスを受信するクライアントは、サーバーがレスポンスを提供することが許可されていることを検証しなければなりません (MUST)。<a href="#section10-1">10.1節</a>を参照してください。例えば、DNS-ID や Common Name が &quot;example.com&quot; の証明書を提供するサーバーが、&quot;https://www.example.org/doc&quot; のレスポンスをプッシュすることは認められていません。</p>
+
+<h3 id="section8-3">8.3. CONNECT メソッド</h3>
+<p>HTTP/1.x において、擬似メソッド CONNECT (<a href="#HTTP-p2">[HTTP-p2]</a>、4.3.6節) は HTTP 接続をリモートホストへのトンネルに変換するために使用されます。CONNECT は、&quot;https&quot; リソースをやりとりする目的でオリジンサーバーと TLS セッションを確立するために、主に HTTP プロキシと共に使用されます。</p>
+<p>HTTP/2 における CONNECT メソッドは、同様にリモートホストへの単一の HTTP/2 ストリーム上にトンネルを確立するために使用されます。HTTP ヘッダーフィールドのマッピングは、一部のヘッダーを除きリクエストヘッダーフィールド (<a href="#section8-1-3-1">8.1.3.1節</a>)に定義されたように動作します。一部のヘッダーについては、具体的には以下のようになります。</p>
+<ul>
+  <li>&quot;:method&quot; ヘッダーフィールドには &quot;CONNECT&quot; が設定されます。</li>
+  <li>&quot;:scheme&quot; と &quot;:path&quot; ヘッダーフィールドは省略されなければなりません (MUST)。</li>
+  <li>&quot;:authority&quot; ヘッダーフィールドは接続するホストとポートを含みます (CONNECT リクエストにおける request-target の authority-form に相当します。<a href="#HTTP-p1">[HTTP-p1]</a>、5.3節)。</li>
+</ul>
+<p>CONNECT をサポートするプロキシは、&quot;:authority&quot; ヘッダーフィールドに指定されたサーバーと TCP コネクション [TCP] を確立します。コネクションの確立に成功すると、<a href="#HTTP-p2">[HTTP-p2]</a>、4.3.6節で定義されるように、プロキシは 2xx ステータスコードを含む HEADERS フレームをクライアントに送信します。</p>
+<p>両方のピアによる初期 HEADERS フレームの送信後、その後に続く全ての DATA フレームは TCP コネクション上に送信されたデータに相当します。クライアントから送信された DATA フレームのペイロードは、プロキシにより TCP サーバーに転送されます。TCP サーバーから受信したデータは、プロキシにより DATA フレームに変換されます。DATA 以外のフレームタイプやストリームの管理フレーム (RST_STREAM や WINDOW_UPDATE、PRIORITY) を接続ストリームには送信してはいけません (MUST NOT)。また、それらのフレームを受信した場合は、ストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として扱わなければなりません (MUST)。</p>
+<p>TCP コネクションはどちらのピアからも終了できます。DATA フレームの END_STREAM フラグは TCP_FIN ビットに相当するフラグとして扱われます。クライアントには END_STREAM フラグが設定されたフレームの受信後に、END_STREAM フラグを設定した DATA フレームの送信が期待されます。END_STREAM フラグが設定された DATA フレームを受信したプロキシは、最後の TCP セグメントに FIN ビットを設定したデータを送信します。FIN ビットが設定された TCP セグメントを受信したプロキシは、END_STREAM フラグを設定した DATA フレームを送信します。なお、最後の TCP セグメントや DATA フレームは空にすることが可能であることに注意してください。</p>
+<p>TCP コネクションエラーは RST_STREAM で通知されます。プロキシは、RST ビットが設定された TCP セグメントの受信を含む、TCP コネクションにおけるいかなるエラーも、CONNECT_ERROR のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として扱います。同様に、ストリームや HTTP/2 接続のエラーを検出した場合、プロキシは RST ビットを設定した TCP セグメントを送信しなければなりません (MUST)。</p>
+</div>
+
+<div class="section">
+<h2 id="section9">9. 追加の HTTP 要件/検討</h2>
+<p>この章では、相互運用性を向上する HTTP プロトコルの属性や、既知のセキュリティ脆弱性に対象する方法、実装差異が起こる可能性を減らす方法などについて説明します。</p>
+
+<h3 id="section9-1">9.1. コネクション管理</h3>
+<p>HTTP/2 接続は持続的です。最高のパフォーマンスを得るために、(例えば、ユーザーが特定の Web ページから移動してしまった時など) サーバーとの通信がこれ以上は不要だと判断したり、サーバーがコネクションを終了するまでクライアントはコネクションを終了しないよう期待されます。</p>
+<p>クライアントは、URI由来のIPアドレスとポートや、選択された代替サービス <a href="#ALT-SVC">[ALT-SVC]</a>、設定したプロキシといった特定の接続先に対して同時に2つ以上の HTTP/2 接続を開始すべきではありません (SHOULD NOT)。クライアントは、利用可能なストリームID空間が少なくなったコネクションを交換 (5.1.1節) したり、エラーが発生したコネクションを交換 (<a href="#section5-4-1">5.4.1節</a>) したりするために、追加のコネクションを生成できます。</p>
+<p>クライアントは、異なる Server Name Indication <a href="#TLS-EXT">[TLS-EXT]</a> の値が使われている同一のIPアドレスとTCPポートに対してや、異なる TLS クライアント証明書を提供するために、複数の接続を開始してもよいものとします (MAY)。しかし、同一の設定に対して複数の接続を生成することは避けるべきです (SHOULD)。[[anchor17: クライアント証明書がどのように関連するかについての文章が必要です。Issue #363 を参照してください。]]</p>
+<p>クライアントは、サーバーを信頼できる (<a href="#section10-1">10.1節</a>) 限り、複数の異なる authority コンポーネントの URI へのリクエストを送信するために単一のコネクションを使用してもよいものとします (MAY)。</p>
+<p>サーバーは、オープンしたコネクションを可能な限り長く維持することが推奨されますが、必要に応じてアイドル状態のコネクションを終了することが認められています。いずれかのエンドポイントがトランスポート層の TCP 接続の終了を選択した時、終了側のエンドポイントは最初に GOAWAY (<a href="#section6-8">6.8節</a>) フレームを送信すべきです (SHOULD)。その結果、両方のエンドポイントは先に送信したフレームが処理されて適切に完了したのか、それとも残りの必要なタスクが中断されたのかを期待通りに確認できます。</p>
+
+<h3 id="section9-2">9.2. TLS の機能の利用</h3>
+<p>HTTP/2 の実装は TLS 1.2 <a href="#TLS12">[TLS12]</a> に対応しなければなりません (MUST)。HTTP/2 固有のいくつかの追加制限と共に、<a href="#TLSBCP">[TLSBCP]</a> の一般的な TLS の利用ガイダンスには従うべきです (SHOULD)。</p>
+<p>TLS の実装は、TLS の Server Name Indication (SNI) <a href="#TLS-EXT">[TLS-EXT]</a> に対応しなければなりません (MUST)。HTTP/2 クライアントは、TLS ネゴシエーションの際に対象のドメイン名を示さなければなりません (MUST)。</p>
+<p>TLS の実装は圧縮を無効化にしなければなりません (MUST)。TLS 圧縮は本来は明らかにされない情報 <a href="#RFC3749">[RFC3749]</a> の漏洩につながります。HTTP/2 は、コンテキストを意識した圧縮機能を提供しているため一般的な圧縮は必要ありません。それゆえこの圧縮機能は、パフォーマンス、セキュリティ、その他の理由から、より一層利用に適していると言えるでしょう。</p>
+<p>実装は、2048ビット以上の ephemeral Diffie-Hellman (DHE) や、セキュリティレベルが128ビットの elliptic curve variant (ECDHE) といった ephemeral cipher suites でネゴシエート (および使用) しなければなりません (MUST)。クライアントは4096ビットまでのサイズの DHE を受け入れなければなりません。</p>
+<p>実装には [RC4] のような既知の脆弱性がある TLS 暗号化方式をネゴシエーションに使用しないことが推奨されます。</p>
+<p>この節の要件を満たしていないなかったり、ポリシーに基づいた制限などがある TLS コネクションとネゴシエートする実装は、HTTP/2 をネゴシエートすべきではありません (SHOULD NOT)。 HTTP/2 プロトコルを考慮から外すことで、クライアントから提示されるプロトコルセットの全てが利用できない可能性があります。このような場合は、<a href="#TLSALPN">[TLSALPN]</a> の3.2節に記述されているように、プロトコルネゴシエーションの失敗を引き起こします。</p>
+<p>実装上の制限により、これら全ての要件に基づいて TLS ネゴシエーションを fail させることはできないかもしれません。エンドポイントは、最小要件を満たさない TLS セッションによって開始された HTTP/2 コネクションを、INADEQUATE_SECURITY のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) と共に終了しなければなりません (MUST)。</p>
+
+<h3 id="section9-3">9.3. GZip コンテンツエンコーディング</h3>
+<p>クライアントは HTTP レスポンスボディの gzip 圧縮に対応しなければなりません (MUST)。accept-encoding ヘッダーフィールドの値にかかわらず、サーバーは gzip でエンコードしたレスポンスを送信してもよいものとします (MAY)。圧縮されたレスポンスには、適切な content-encoding ヘッダーフィールドを伴わなければなりません (MUST)。</p>
+<p>これは事実上、Accept-Encoding ヘッダーフィールド (<a href="#HTTP-p2">[HTTP-p2]</a>、5.3.4節) の値を &quot;identity&quot; から &quot;identity, gzip&quot; へ暗黙的に変更するものですが、&quot;;q=0&quot; を含んでいた場合であっても、gzip エンコードを抑制することはできません。HTTP/2 を HTTP/1.1 に変換する中継者は、Accept-Encoding の値に &quot;gzip&quot; を含むリクエストでなくても、ペイロードを解凍しなければなりません (MUST)。</p>
+</div>
+
+<div class="section">
+<h2 id="section10">10. セキュリティへの配慮</h2>
+
+<h3 id="section10-1">10.1. サーバーの権限</h3>
+<p>クライアントは、リソースに対する権限のあるサーバーからの HTTP/2 レスポンスのみを受け取ることができます。これは、レスポンスを受け取る前にクライアントが PUSH_PROMISE を検証するサーバープッシュ (<a href="#section8-2">8.2節</a>) においては特に重要です。</p>
+<p>HTTP/2 は、サーバーが対象のリソースの提供する権限があるかどうかを判定するために HTTP/1.1 の権限の定義に依存しています。<a href="#HTTP-p1">[HTTP-p1]</a>、9.1節を参照してください。&quot;http&quot; URI スキームではローカル名前解決、&quot;https&quot; スキームでは提供されたサーバー識別子 (<a href="#RFC2818">[RFC2818]</a>、3章) にそれぞれ依存します。</p>
+<p>信頼できないサーバーが提供するリソースは、いかなる場合でもクライアントは使用してはいけません (MUST NOT)。</p>
+
+<h3 id="section10-2">10.2. クロスプロトコル攻撃</h3>
+<p>クロスプロトコル攻撃では、攻撃者は異なるプロトコルを解釈するサーバーに対して、クライアントに最初のプロトコルでトランザクションを開始させます。これにより、攻撃者は第二のプロトコルの有効なトランザクションのように見えるトランザクションを開始できるかもしれません。Web コンテキストの機能と組み合わせることで、これはプライベートネットワーク内の不十分な保護下にあるサーバーと通信をするために使用できます。</p>
+<p>HTTP/2 の ALPN 識別子と共に TLS ハンドシェイクを完了することで、十分に配慮することができます。ALPN は他の TLS ベースのプロトコルへの攻撃を防ぎ、サーバーが HTTP/2 を処理するための前向きな意思表示を提供します。</p>
+<p>TLS の暗号化は、攻撃者が平文プロトコル上でクロスプロトコル攻撃に使用するようなデータの制御を難しくします。</p>
+<p>平文バージョンの HTTP/2 はクロスプロトコル攻撃に対する最低限の保護しか持ちません。コネクションプリフェイス (<a href="#section3-5">3.5節</a>) は HTTP/1.1 サーバーを混乱させるように設計された文字列を含みますが、他のプロトコルに対する特別な保護を提供しません。Upgrade ヘッダーフィールドを含む HTTP/1.1 リクエストの一部を無視する意思のあるサーバーは、クロスプロトコル攻撃にさらされる可能性があります。</p>
+
+<h3 id="section10-3">10.3. 中継者カプセル化攻撃</h3>
+<p>HTTP/2 ヘッダーフィールドの名前と値は、長さプレフィクスのあるオクテット列にエンコードされます。これは HTTP/2 が、ヘッダーフィールドの名前や値として、いかなる文字列オクテットの送信も可能にします。HTTP/2 のリクエストやレスポンスを HTTP/1.1 に直接変換する中継者は、不正な HTTP/1.1 メッセージを生成することが可能です。攻撃者は、不正なヘッダーフィールドや追加のヘッダーフィールドを含む HTTP/1.1 メッセージや、完全に改竄された新しいメッセージの生成を中継者が引き起こすよう、この振る舞いを利用するかもしれません。</p>
+<p>特に、行頭復帰 (U+000D) や改行 (U+000A) などの HTTP/1.1 では認められていない文字を含むヘッダーフィールドの名前や値は、<a href="#HTTP-p1">[HTTP-p1]</a>、3.2.4節で規定されているように、中継者により逐語的に変換されてはいけません (MUST NOT)。</p>
+<p>HTTP/1.x から HTTP/2 への変換では、攻撃者に同様の機会を与えません。HTTP/2 に変換する中継者は、ヘッダーフィールドの値からいかなる &quot;obs-fold&quot; な文字を削除しなければなりません (MUST)。</p>
+
+<h3 id="section10-4">10.4. プッシュリソースのキャッシュ</h3>
+<p>プッシュレスポンスとはクライアントからの明確なリクエストがないレスポンスです。リクエストは PUSH_PROMISE フレームによりサーバーから提供されます。</p>
+<p>プッシュされたレスポンスのキャッシュは可能です。これはオリジンサーバーの Cache-Control ヘッダーフィールドが提供する指示に基づいておこなわれます。しかしながら、1つのサーバーホストが複数のテナントを提供する場合は、問題を引き起こす可能性があります。例えば、サーバーは複数のユーザーにそれぞれ URI 空間の一部を提供するかもしれません。</p>
+<p>複数のテナントが同一サーバーの空間を共有する場合、サーバーは、テナントがリソースの権限を超えてキャッシュをプッシュしないことを保証しなければなりません (MUST)。これを強制しなければ、権限のあるテナントが提供する実際のキャッシュを上書きし、本来のキャッシュの外で提供されたキャッシュを、サーバーが提供することが可能になってしまいます。</p>
+<p>権限のないオリジンサーバー (<a href="#section10-1">10.1節</a>) のプッシュレスポンスを、使用したりキャッシュすることはありません。</p>
+
+<h3 id="section10-5">10.5. サービス拒否への考慮</h3>
+<p>HTTP/2 接続は、HTTP/1.1 接続よりも機能のためにより大きなリソースの割り当てを要求します。ヘッダー圧縮およびフロー制御の使用はより多くの状態を保持するため、リソースの割り当てに依存します。これらの機能の設定は、各機能に対するメモリーの割り当てを厳密に制限することを保証します。処理能力については、同様のやり方で保護することはできません。</p>
+<p>SETTINGS フレームは、ピアに追加の処理時間を発生させるために悪用される可能性があります。これは、無意味な SETTINGS パラメーターの変更や複数の未定義のパラメーターの変更、同一フレームにおいて同じ設定を複数回変更をするなどで起こる可能性があります。同様に、WINDOW_UPDATE や PRIORITY、BLOCKED フレームも、無駄なリソースの消費を引き起こすために悪用される可能性があります。サーバーはクライアントに余分な処理を発生されるために、権限のないオリジンに対する ALTSVC フレームを不正に送信するかもしれません。</p>
+<p>小さな、または空の大量のフレームは、ピアにフレームヘッダーの処理時間を消費させるために悪用される可能性があります。用途によっては、ストリームを終了させるために空の DATA フレームを送信するといった、正しい方法でも使われることに注意してください。</p>
+<p>ヘッダー圧縮も、処理リソースを浪費するいくつかの機会を提供します。悪用の可能性についての詳細は <a href="#COMPRESSION">[COMPRESSION]</a> を参照してください。</p>
+<p>SETTINGS パラメーターの制限では、直ちに処理を軽減させることはできません。エンドポイントは、ピアが新しく設定しようとした制限値を超えられる状況に晒されたままです。特にコネクションが確立した直後は、サーバーによって設定される制限値がクライアントに通知されておらず、その場合明らかにプロトコル違反にならずに制限値を超えることが可能です。</p>
+<p>SETTINGS の変更、小さなフレーム、ヘッダー圧縮といった、これらの全ての機能には正当な用途があります。これらの機能は、不必要に利用されたり、過剰に使用されたりした時に限り、負荷になります。</p>
+<p>この動作を監視しないエンドポイントは、自分自身をサービス拒否攻撃のリスクに晒すことになります。実装は先に述べたような特徴を追跡し、それらの使用に制限を設定すべきです (SHOULD)。エンドポイントは、不審な挙動を ENHANCE_YOUR_CALM のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱ってもよいものとします (MAY)。</p>
+
+<h3 id="section10-6">10.6. 圧縮の使用</h3>
+<p>HTTP/2 はヘッダーフィールド (<a href="#section4-3">4.3節</a>) とレスポンスボディ (<a href="#section9-3">9.3節</a>) の両方の圧縮のより多く利用します。圧縮は、攻撃者の制御下でかつ同じコンテキストで圧縮された場合に、攻撃者による機密データの復元を可能にします。</p>
+<p>Web の特性を利用した圧縮に関する攻撃手法 (例: <a href="#BREACH">[BREACH]</a>) もあります。攻撃者は様々な平文を含む複数のリクエストを誘発し、得られた各暗号テキストの長さを観測します。推測した機密が正しければ、その長さは短くなります。</p>
+<p>保護されたチャンネル上で通信する実装は、各データソースに異なる圧縮辞書を使わない限り、機密と攻撃者が制御するデータの両方を含む内容を圧縮してはいけません (MUST NOT)。データソースが確実に判断できない場合は、圧縮を使用してはいけません (MUST NOT)。</p>
+<p>中継者は、中継者がデータの出所を識別することを認める追加の情報が提供されない限り、DATA フレームの圧縮を変更してはいけません (MUST NOT)。具体的には、圧縮されていないフレームを圧縮することはできません。また、個別に圧縮されたフレームを単一のフレームにマージすることもできません。圧縮されたフレームは、解凍されたり、複数のフレームに分割されてもよいものとします (MAY)。</p>
+<p>ヘッダーフィールドの圧縮に関するさらなる考察は、<a href="#COMPRESSION">[COMPRESSION]</a> で述べられています。</p>
+
+<h3 id="section10-7">10.7. パディングの使用</h3>
+<p>HTTP/2 におけるパディングは、TLS <a href="#TLS12">[TLS12]</a> により提供されるような一般的なパディングの置き換えを意図していません。冗長なパディングは逆効果にもなり得ます。正しいアプリケーションであるかどうかは、パディングされたデータに関する特別な情報を持つことによって決まります。</p>
+<p>圧縮を利用した攻撃を軽減するために圧縮機能を無効化することは、対抗策としてのパディングよりも適しているかもしれません。</p>
+<p>パッディングはフレームの内容の正確なサイズをわかりにくくするために使用でき、HTTP の特定の攻撃を軽減するために提供されます。例えば、攻撃者により制御されたプレーンテキストと機密データを含む圧縮コンテンツにおける攻撃 (<a href="#BREACH">[BREACH]</a> の例を参照してください) があります。</p>
+<p>パディングの使用は、一見してわかる防御よりも結果的に弱い防御に終わることがあります。パディングは攻撃者が観察しなければならないフレームの数を増加させることで、長さ情報の推測をより困難にすることしかできません。不適切に実装されたパディングの構造は、簡単に破られる可能性があります。</p>
+<p>特に予測可能な分布によるランダムなパッディングは、非常にわずかな保護しか提供できません。その他に固定サイズのパディングペイロードは、その固定サイズの境界を超えるようなペイロードサイズにすることにより、情報を漏洩させます。その場合、攻撃者がプレーンテキストを制御することが出来なければなりません。</p>
+<p>中継者は、パディングを削除すべきではありません (SHOULD NOT)。しかしながら、パディングによる保護を向上させる意図がある場合には、パディングを削除し異なる量のパディングを追加してもよいものとします (MAY)。</p>
+
+<h3 id="section10-8">10.8. プライバシーへの配慮</h3>
+<p>HTTP/2 のいくつかの特徴は、時間をかけてサーバーやクライアントの関連する動作を観測する機会を提供します。これには、設定の値やフロー制御ウインドウの管理方法、優先度がストリームに割り当てられる方法、攻撃に対する反応のタイミング、任意の機能の扱いなどを含みます。</p>
+<p>観測可能な振る舞いの違いを生み出す限り、&lt;<a href="http://www.w3.org/TR/html5/introduction.html#fingerprint">http://www.w3.org/TR/html5/introduction.html#fingerprint</a>&gt; で定義されているように、特定クライアントのフィンガープリントの取得に使用することができてしまいます。</p>
+</div>
+
+<div class="section">
+<h2 id="section11">11. IANA への配慮</h2>
+<p>HTTP/2 を識別するための文字列は、<a href="#TLSALPN">[TLSALPN]</a> に記載される &quot;Application Layer Protocol Negotiation (ALPN) Protocol IDs&quot; レジストリに登録されます。</p>
+<p>この文書では、エラーコードのレジストリを制定しています。この新しいレジストリは、新しい &quot;Hypertext Transfer Protocol (HTTP) 2.0 Parameters&quot; セクションに追加されます。</p>
+<p>この文書では HTTP で使用する &quot;HTTP2-Settings&quot; ヘッダーフィールドを登録します。</p>
+<p>この文書では、コネクションプリフェイス (<a href="#section3-5">3.5節</a>) との衝突を防ぐために HTTP で使用する &quot;PRI&quot; メソッドを登録します。</p>
+
+<h3 id="section11-1">11.1. HTTP/2.0 識別文字列の登録</h3>
+<p>この文書は <a href="#TLSALPN">[TLSALPN]</a> に記載される &quot;Application Layer Protocol Negotiation (ALPN) Protocol IDs&quot; レジストリにおける HTTP/2 識別子の登録について制定します。</p>
+<dl>
+  <dt>Protocol<dt>
+  <dd>HTTP/2 over TLS</dd>
+  <dt>Identification Sequence</dt>
+  <dd>0x68 0x32 (&quot;h2&quot;)</dd>
+  <dt>Specification</dt>
+  <dd>この文書 (RFCXXXX)</dd>
+</dl>
+<p>文字列 &quot;h2c&quot; は平文 TCP 上で使用される HTTP/2 を識別します。</p>
+<dl>
+  <dt>Protocol<dt>
+  <dd>HTTP/2 over TCP</dd>
+  <dt>Identification Sequence</dt>
+  <dd>0x68 0x32 0x63 (&quot;h2c&quot;)</dd>
+  <dt>Specification</dt>
+  <dd>この文書 (RFCXXXX)</dd>
+</dl>
+
+<h3 id="section11-2">11.2. エラーコードレジストリ</h3>
+<p>この文書は HTTP/2 エラーコードのレジストリを制定します。&quot;HTTP/2 Error Code&quot; レジストリは32ビットの空間を管理します。 &quot;HTTP/2 Error Code&quot; レジストリは、&quot;Expert Review&quot; ポリシー <a href="#RFC5226">[RFC5226]</a> に従って運用します。</p>
+
+<p>この文書は HTTP/2.0 エラーコードのレジストリを制定します。&quot;HTTP/2.0 Error Code&quot; レジストリは32ビットの空間を管理します。 &quot;HTTP/2.0 Error Code&quot; レジストリは、&quot;Expert Review&quot; ポリシー <a href="#RFC5226">[RFC5226]</a> に従って運用します。</p>
+<p>エラーコードの登録には、そのエラーコードの説明を含める必要があります。専門のレビュアーは新規の登録が既存のエラーコードと重複可能かについて検討することを推奨します。既存の登録の使用は推奨されますが、義務ではありません。</p>
+<p>新しい登録は以下の情報の提供が推奨されます。</p>
+<dl>
+  <dt>Error Code</dt>
+  <dd>32ビットのエラーコードの値。</dd>
+  <dt>Name</dt>
+  <dd>エラーコードの名前。 エラーコードの名前の指定は任意です。</dd>
+  <dt>Description</dt>
+  <dd>エラーコードに該当する状態の説明。</dd>
+  <dt>Specification</dt>
+  <dd>エラーコードを定義する仕様への任意の参照してください。</dd>
+</dl>
+<p>登録されたエラーコードの初期セットは<a href="#section7">7章</a>で確認できます。</p>
+
+<h3 id="section11-3">11.3. HTTP2-Settings ヘッダーフィールドの登録</h3>
+<p>この節は、&quot;HTTP2-Settings&quot; ヘッダーフィールドを Permanent Message Header Field Registry <a href="#BCP90">[BCP90]</a> に登録します。</p>
+<dl>
+  <dt>Header field name</dt>
+  <dd>HTTP2-Settings</dd>
+  <dt>Applicable protocol</dt>
+  <dd>http</dd>
+  <dt>Status</dt>
+  <dd>standard</dd>
+  <dt>Author/Change controller</dt>
+  <dd>IETF</dd>
+  <dt>Specification document(s)</dt>
+  <dd>この文書の<a href="#section3-2-1">3.2.1節</a></dd>
+  <dt>Related information</dt>
+  <dd>このヘッダーフィールドは、HTTP/2 クライアントの Upgrade に基づくネゴシエーションにのみ使用されます。</dd>
+</dl>
+
+<h3 id="section11-4">11.4. PRI メソッドの登録</h3>
+<p>この節は、&quot;PRI&quot; メソッドを HTTP Method Registry <a href="#HTTP-p2">[HTTP-p2]</a> に登録します。</p>
+<dl>
+  <dt>Method Name</dt>
+  <dd>PRI</dd>
+  <dt>Safe</dt>
+  <dd>No</dd>
+  <dt>Idempotent</dt>
+  <dd>No</dd>
+  <dt>Author/Change controller</dt>
+  <dd>IETF</dd>
+  <dt>Specification document(s)</dt>
+  <dd>この文書の<a href="#section3-5">3.5節</a></dd>
+  <dt>Related information</dt>
+  <dd>このメソッドは実際のクライアントでは使用されません。HTTP/1.1 サーバーや中継者が HTTP/2 コネクションプリフェイスの解析をする際に、このメソッドが使用されているように見えます。</dd>
+</dl>
+</div>
+
+<div class="section">
+<h2 id="section12">12. 謝辞</h2>
+<p>この文書は、以下の個人からの多くの意見を含んでいます:</p>
+<ul>
+  <li>Adam Langley, Wan-Teh Chang, Jim Morrison, Mark Nottingham, Alyssa Wilk, Costin Manolache, William Chan, Vitaliy Lvin, Joe Chan, Adam Barth, Ryan Hamilton, Gavin Peters, Kent Alstad, Kevin Lindsay, Paul Amer, Fan Yang, Jonathan Leighton (SPDY の貢献者).</li>
+  <li>Gabriel Montenegro と Willy Tarreau (Upgrade メカニズム)</li>
+  <li>William Chan, Salvatore Loreto, Osama Mazahir, Gabriel Montenegro, Jitu Padhye, Roberto Peon, Rob Trace (フロー制御)</li>
+  <li>Mark Nottingham, Julian Reschke, James Snell, Jeff Pinner, Mike Bishop, Herve Ruellan (多くの編集貢献者)</li>
+  <li>Alexey Melnikov は2013年に多くの文書を編集しました。</li>
+  <li>Martinの貢献の多くは、彼が雇用中、マイクロソフトによりサポートされていました。</li>
+</ul>
+</div>
+
+<div class="section">
+<h2 id="section13">13. 参考文献</h2>
+<h3 id="section13-1">13.1. 引用文書</h3>
+<dl>
+  <dt id="ALT-SVC">[ALT-SVC]</dt>
+  <dd>Nottingham, M., McManus, P., and J. Reschke, &quot;HTTP Alternative Services&quot;, draft-ietf-httpbis-alt-svc-01 (work in progress), April 2014.</dd>
+  <dt id="COMPRESSION">[COMPRESSION]</dt>
+  <dd>Ruellan, H. and R. Peon, &quot;HPACK - Header Compression for HTTP/2&quot;, draft-ietf-httpbis-header-compression-07 (work in progress), April 2014.</dd>
+  <dt id="COOKIE">[COOKIE]</dt>
+  <dd>Barth, A., &quot;HTTP State Management Mechanism&quot;, RFC 6265, April 2011.</dd>
+  <dt id="GZIP">[GZIP]</dt>
+  <dd>Deutsch, P., Gailly, J-L., Adler, M., Deutsch, L., and G. Randers-Pehrson, &quot;GZIP file format specification version 4.3&quot;, RFC 1952, May 1996.</dd>
+  <dt id="HTTP-p1">[HTTP-p1]</dt>
+  <dd>Fielding, R., Ed. and J. Reschke, Ed., &quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;, draft-ietf-httpbis-p1-messaging-26 (work in progress), February 2014.</dd>
+  <dt id="HTTP-p2">[HTTP-p2]</dt>
+  <dd>Fielding, R., Ed. and J. Reschke, Ed., &quot;Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content&quot;, draft-ietf-httpbis-p2-semantics-26 (work in progress), February 2014.</dd>
+  <dt id="HTTP-p4">[HTTP-p4]</dt>
+  <dd>Fielding, R., Ed. and J. Reschke, Ed., &quot;Hypertext Transfer Protocol (HTTP/1.1): Conditional Requests&quot;, draft-ietf-httpbis-p4-conditional-26 (work in progress), February 2014.</dd>
+  <dt id="HTTP-p5">[HTTP-p5]</dt>
+  <dd>Fielding, R., Ed., Lafon, Y., Ed., and J. Reschke, Ed., &quot;Hypertext Transfer Protocol (HTTP/1.1): Range Requests&quot;, draft-ietf-httpbis-p5-range-26 (work in progress), February 2014.</dd>
+  <dt id="HTTP-p6">[HTTP-p6]</dt>
+  <dd>Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke, Ed., &quot;Hypertext Transfer Protocol (HTTP/1.1): Caching&quot;, draft-ietf-httpbis-p6-cache-26 (work in progress), February 2014.</dd>
+  <dt id="HTTP-p7">[HTTP-p7]</dt>
+  <dd>Fielding, R., Ed. and J. Reschke, Ed., &quot;Hypertext Transfer Protocol (HTTP/1.1): Authentication&quot;, draft-ietf-httpbis-p7-auth-26 (work in progress), February 2014.</dd>
+  <dt id="RFC2119">[RFC2119]</dt>
+  <dd>Bradner, S., &quot;Key words for use in RFCs to Indicate Requirement Levels&quot;, BCP 14, RFC 2119, March 1997.</dd>
+  <dt id="RFC2818">[RFC2818]</dt>
+  <dd>Rescorla, E., &quot;HTTP Over TLS&quot;, RFC 2818, May 2000.</dd>
+  <dt id="RFC3986">[RFC3986]</dt>
+  <dd>Berners-Lee, T., Fielding, R., and L. Masinter, &quot;Uniform Resource Identifier (URI): Generic Syntax&quot;, STD 66, RFC 3986, January 2005.</dd>
+  <dt id="RFC4648">[RFC4648]</dt>
+  <dd>Josefsson, S., &quot;The Base16, Base32, and Base64 Data Encodings&quot;, RFC 4648, October 2006.</dd>
+  <dt id="RFC5226">[RFC5226]</dt>
+  <dd>Narten, T. and H. Alvestrand, &quot;Guidelines for Writing an IANA Considerations Section in RFCs&quot;, BCP 26, RFC 5226, May 2008.</dd>
+  <dt id="RFC5234">[RFC5234]</dt>
+  <dd>Crocker, D. and P. Overell, &quot;Augmented BNF for Syntax Specifications: ABNF&quot;, STD 68, RFC 5234, January 2008.</dd>
+  <dt id="RFC6454">[RFC6454]</dt>
+  <dd>Barth, A., &quot;The Web Origin Concept&quot;, RFC 6454, December 2011.</dd>
+  <dt id="TCP">[TCP]</dt>
+  <dd>Postel, J., &quot;Transmission Control Protocol&quot;, STD 7, RFC 793, September 1981.</dd>
+  <dt id="TLS-EXT">[TLS-EXT]</dt>
+  <dd>Eastlake, D., &quot;Transport Layer Security (TLS) Extensions: Extension Definitions&quot;, RFC 6066, January 2011.</dd>
+  <dt id="TLS12">[TLS12]</dt>
+  <dd>Dierks, T. and E. Rescorla, &quot;The Transport Layer Security (TLS) Protocol Version 1.2&quot;, RFC 5246, August 2008.</dd>
+  <dt id="TLSALPN">[TLSALPN]</dt>
+  <dd>Friedl, S., Popov, A., Langley, A., and E. Stephan, &quot;Transport Layer Security (TLS) Application Layer Protocol Negotiation Extension&quot;, draft-ietf-tls-applayerprotoneg-05 (work in progress), March 2014.</dd>
+  <dt id="UTF-8">[UTF-8]</dt>
+  <dd>Yergeau, F., &quot;UTF-8, a transformation format of ISO 10646&quot;, STD 63, RFC 3629, November 2003.</dd>
+</dl>
+
+<h3 id="section14-2">14.2. 参考文書</h3>
+<dl>
+  <dt id="RCP90">[BCP90]</dt>
+  <dd>Klyne, G., Nottingham, M., and J. Mogul, &quot;Registration Procedures for Message Header Fields&quot;, BCP 90, RFC 3864, September 2004.</dd>
+  <dt id="BREACH">[BREACH]</dt>
+  <dd>Gluck, Y., Harris, N., and A. Prado, &quot;BREACH: Reviving the CRIME Attack&quot;, July 2013, &lt;http://breachattack.com/resources/BREACH%20-%20SSL,%20gone%20in%2030%20seconds.pdf&gt;.</dd>
+  <dt id="IDNA">[IDNA]</dt>
+  <dd>Klensin, J., &quot;Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework&quot;, RFC 5890, August 2010.</dd>
+  <dt id="RC4">[RC4]</dt>
+  <dd>Rivest, R., &quot;The RC4 encryption algorithm&quot;, RSA Data Security, Inc. , March 1992.</dd>
+  <dt id="RFC1323">[RFC1323]</dt>
+  <dd>Jacobson, V., Braden, B., and D. Borman, &quot;TCP Extensions for High Performance&quot;, RFC 1323, May 1992.</dd>
+  <dt id="TALKING">[TALKING]</dt>
+  <dd>Huang, L-S., Chen, E., Barth, A., Rescorla, E., and C. Jackson, &quot;Talking to Yourself for Fun and Profit&quot;, 2011, &lt;http://w2spconf.com/2011/papers/websocket.pdf&gt;.</dd>
+  <dt id="TLSBCP">[TLSBCP]</dt>
+  <dd>Sheffer, Y., Holz, R., and P. Saint-Andre, &quot;Recommendations for Secure Use of TLS and DTLS&quot;, draft-sheffer-tls-bcp-02 (work in progress), February 2014.</dd>
+</dl>
+</div>
+
+<div class="section">
+<h2 id="changelog">付録A. 変更点 (公開前に RFC 編集者により削除されます)</h2>
+
+<h3 id="since-draft-ietf-httpbis-http2-11">A.1. draft-ietf-httpbis-http2-11 からの変更</h3>
+<ul>
+  <li>BLOCKED フレームを追加しました (リスクあり)。</li>
+  <li>優先度の仕組みを単純化しました。</li>
+  <li>DATA フレームごとの GZip 圧縮を追加しました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-10">A.2. draft-ietf-httpbis-http2-10 からの変更</h3>
+<ul>
+  <li>混同を避けるために &quot;コネクションヘッダー&quot; を &quot;コネクションプリフェイス&quot; に変更しました。</li>
+  <li>依存関係に基づくストリーム優先度を追加しました。</li>
+  <li>平文と保護された HTTP/2 を区別するために &quot;h2c&quot; 識別子を追加しました。</li>
+  <li>PUSH_PROMISE にパディングを追加しました。</li>
+  <li>ALTSVC フレームとその根拠となる文章を統合しました。</li>
+  <li>&quot;deflate&quot; Content-Encoding の要件を削除しました。</li>
+  <li>圧縮の使用に関するセキュリティへの配慮を改善しました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-09">A.3. draft-ietf-httpbis-http2-09 からの変更</h3>
+<ul>
+  <li>データフレームにパディングを追加しました。</li>
+  <li>フレームタイプ、エラーコード、設定を再ナンバリングしました。</li>
+  <li>INADEQUATE_SECURITY エラーコードを追加しました。</li>
+  <li>TLS の使用要件を1.2に更新し、TLS 圧縮の使用を禁止しました。</li>
+  <li>フレームおよび設定の拡張性についてを削除しました。</li>
+  <li>設定識別子のサイズを変更しました。</li>
+  <li>フロー制御の無効化機能を削除しました。</li>
+  <li>プロトコル識別子を &quot;h2&quot; に変更しました。</li>
+  <li>:authority の使用をオプションに変更し、非 HTTP における userinfo の使用を許可しました。</li>
+  <li>Cookie の0x0での分割を許可しました。</li>
+  <li>将来的な衝突の可能性を防ぐため、HTTP/1.1 の PRI メソッドを予約しました</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-08">A.4. draft-ietf-httpbis-http2-08 からの変更</h3>
+<ul>
+  <li>より効率的なヘッダー圧縮のためのクッキー分割を追加しました。</li>
+  <li>ヘッダーフィールドの順序と値結合メカニズムを追加しました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-07">A.5. draft-ietf-httpbis-http2-07 からの変更</h3>
+<ul>
+  <li>実装向けのドラフトとしました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-06">A.6. draft-ietf-httpbis-http2-06 からの変更</h3>
+<ul>
+  <li>CONNECT メソッドについての定義を追加しました。</li>
+  <li>安全なプッシュの使用と、リクエストボディのないキャッシュ可能なメソッドを強制しました。</li>
+  <li>混同の可能性を避けるために :host を :authority に変更しました。</li>
+  <li>ヘッダー圧縮テーブルサイズの設定を追加しました。</li>
+  <li>設定の受信通知を追加しました。</li>
+  <li>CONTINUATION から不要で問題となる可能性があるフラグを削除しました。</li>
+  <li>サービス拒否への考慮を追加しました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-05">A.7. draft-ietf-httpbis-http2-05 からの変更</h3>
+<ul>
+  <li>実装に向けたドラフトとしました。</li>
+  <li>END_PUSH_PROMISE フラグの番号を変更しました。</li>
+  <li>文章を明確化し、編集上の変更をおこないました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-04">A.8. draft-ietf-httpbis-http2-04 からの変更</h3>
+<ul>
+  <li>HEADERS や PUSH_PROMISE のための CONTINUATION フレームを追加しました。</li>
+  <li>SETTINGS_MAX_CONCURRENT_STREAMS が0の場合の PUSH_PROMISE を暗黙的に禁止しました。</li>
+  <li>リクエストボディのない全ての安全なメソッドでのプッシュを許可しました。</li>
+  <li>リクエストとレスポンスでの HTTP ヘッダーフィールドの使用を明確にしました。</li>
+  <li>HTTP/1.1 のホップ間ヘッダーフィールドを禁止しました。</li>
+  <li>:-ヘッダーが存在しないまたはルーティングが不正なリクエストを、中継車が転送しないことを要求しました。</li>
+  <li>ストリーム終了後やストリーム初期化後、GOAWAY の後の様々なフレームの扱いに関する要件を明確にしました。</li>
+  <li>各ストリームの状態における様々なフレームタイプの送信の禁止をより明確にしました。</li>
+  <li>最後に受信した設定値が有効な値としました。</li>
+  <li>TLS バージョンや拡張、暗号化の要件を明確にしました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-03">A.9. draft-ietf-httpbis-http2-03 からの変更</h3>
+<ul>
+  <li>大規模な再構成を適用しました。</li>
+  <li>最初のヘッダー圧縮の草案への参照を追加しました。</li>
+  <li>フレームライフサイクルの正式な説明を追加しました。</li>
+  <li>END_STREAM (FINAL からの名称変更) を HEADER/DATA に戻しました。</li>
+  <li>HEADERS+PRIORITY が削除され、HEADERS フレームに優先度をオプションとして追加しました。</li>
+  <li>PRIORITY フレームが追加されました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-02">A.10. draft-ietf-httpbis-http2-02 からの変更</h3>
+<ul>
+  <li>ヘッダーブロックを転送する連続したフレームを追加しました。</li>
+  <li>Cookie のような他の HTTP ステートフルな概念との混乱を防ぐため、&quot;session&quot; を &quot;connection&quot; に置き換えました。</li>
+  <li>&quot;message&quot; を削除しました。</li>
+  <li>NPN から TLS ALPN に変更しました。</li>
+  <li>編集上の変更をおこないました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-01">A.11. draft-ietf-httpbis-http2-01 からの変更</h3>
+<ul>
+  <li>フレームタイプやエラーコード、設定のための IANA への配慮の節を追加しました。</li>
+  <li>データフレーム圧縮を削除しました。</li>
+  <li>PUSH_PROMISE を追加しました。</li>
+  <li>フレーミングのための、全体適用可能なフラグを追加しました。</li>
+  <li>zlib に基づくヘッダー圧縮メカニズムを削除しました。</li>
+  <li>参照を更新しました。</li>
+  <li>ストリームIDの再利用について明確化しました。</li>
+  <li>CREDENTIALS フレームとそれに関連するメカニズムを削除しました。</li>
+  <li>フロー制御の単純な実装に対するアドバイスを追加しました。</li>
+  <li>セッションヘッダーの節を追加しました。</li>
+  <li>フレームヘッダーを再構築しました。データフレームとコントロールフレームの違いをなくしました。</li>
+  <li>セッションレベルの制限を含めるようフロー制御の属性を変更しました。</li>
+  <li>プッシュリソースと複数テナントサーバーのキャッシュについての注意を追加しました。</li>
+  <li>議論に基づきプロトコルラベルの形式を変更しました。</li>
+</ul>
+
+<h3 id="since-draft-ietf-httpbis-http2-00">A.12. draft-ietf-httpbis-http2-00 からの変更</h3>
+<ul>
+  <li>全体的に表題を変更しました。</li>
+  <li>SPDY 草案#2 との非互換についての節を削除しました。</li>
+  <li>GOAWAY の値が2になっている場合の INTERNAL_ERROR を変更しました &lt;<a href="https://groups.google.com/forum/?fromgroups#!topic/spdy-dev/cfUef2gL3iU">https://groups.google.com/forum/?fromgroups#!topic/spdy-dev/cfUef2gL3iU</a>&gt;。</li>
+  <li>概念と導入を置き換えました。</li>
+  <li>Upgrade メカニズムを含む HTTP/2.0 の開始の節を追加しました。</li>
+  <li>未使用の参照を削除しました。</li>
+  <li>&lt;http://tools.ietf.org/html/draft-montenegro-httpbis-http2-fc-principles-01&gt; に基づくフロー制御の方針 (5.2.1節) を追加しました。</li>
+</ul>
+
+<h3 id="since-draft-mbelshe-httpbis-spdy-00">A.13. draft-mbelshe-httpbis-spdy-00 からの変更</h3>
+<ul>
+  <li>draft-ietf-httpbis-http2 のベースに採用しました。</li>
+  <li>著者/編集者リストを更新しました。</li>
+  <li>状態についてのノートを追加しました。</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>著者の連絡先</h2>
+
+<dl>
+  <dt>Mike Belshe</dt>
+  <dd>Twist<br>
+  EMail: mbelshe@chromium.org</dd>
+  <dt>Roberto Peon</dt>
+  <dd>Google, Inc<br>
+  EMail: fenix@google.com</dd>
+  <dt>Martin Thomson (editor)</dt>
+  <dd>Mozilla<br>
+  Suite 300<br>
+  650 Castro Street<br>
+  Mountain View, CA 94041<br>
+  US<br>
+  EMail: martin.thomson@gmail.com</dd>
+</dl>
+</div>
+</div>
+
+</body>
+</html>
