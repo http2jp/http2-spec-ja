@@ -18,7 +18,7 @@
 <dt>公開日:</dt>
 <dd class="date"><span class="published">2014-08-03</span></dd>
 <dt>更新日:</dt>
-<dd class="date"><span class="modified">2013-08-03</span></dd>
+<dd class="date"><span class="modified">2013-10-28</span></dd>
 <dt>翻訳者:</dt>
 <dd class="vcard"><span class="fn n"><span class="given-name">Moto</span> <span class="family-name">Ishizawa</span></span> &lt;<a href="mailto:summerwind.jp+spec@gmail.com" class="email">summerwind.jp@gmail.com</a>&gt;</dd>
 <dt>翻訳協力:</dt>
@@ -1327,7 +1327,7 @@ Extension-Field: bar       ==>     - END_STREAM
 
 <h4 id="section9-2-2">9.2.2. TLS 暗号スイート</h4>
 <p>HTTP/2 において許可される TLS 暗号スイートのセットは限定的です。HTTP/2 では、ephemeral Diffie-Hellman (DHE) <a href="#TLS12">[TLS12]</a> や elliptic curve variant (ECDHE) <a href="#RFC4492">[RFC4492]</a> などの ephemeral key exchange に対応する暗号スイートのみが使用されなければなりません (MUST)。ephemeral key exchange は、最低でも2048ビットの DHE か、128ビットのセキュリティレベルの ECDH でなければなりません (MUST)。クライアントは 4096 ビットまでのサイズの DHE を受け入れなければなりません (MUST)。HTTP はストリーム暗号またはブロック暗号を使用する暗号スイートを使用してはなりません (MUST NOT)。AES の Galois Counter Model (GCM) モード <a href="#RFC5288">[RFC5288]</a> のような Authenticated Encryption with Additional Data (AEAD) モードは受け入れ可能です。</p>
-<p>TLS 1.2 の実装は、提供する暗号スイートに HTTP/2 では許可されないセットを持つ可能性があり、TLS 1.2 が必須とした暗号スイートの使用を妨げるため、これらの制限の影響します。この問題を避けるため、TLS 1.2 を使用する HTTP/2 の実装は、TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 <a href="#TLS-ECDHE">[TLS-ECDHE]</a> と P256 <a href="#FIPS186">[FIPS186]</a> に対応しなければなりません (MUST)。</p>
+<p>TLS 1.2 の実装は、提供する暗号スイートとして HTTP/2 では許可されないセットを持つ可能性があり、TLS 1.2 が必須とした暗号スイートの使用を妨げることになるため、これらの制限に影響します。この問題を避けるため、TLS 1.2 を使用する HTTP/2 の実装は、P256 曲線 <a href="#FIPS186">[FIPS186]</a> を使用した TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 <a href="#TLS-ECDHE">[TLS-ECDHE]</a> に対応しなければなりません (MUST)。</p>
 <p>クライアントは、HTTP/2 に対応しないサーバーへの接続を想定することを目的として、上記の制限により禁止された暗号スイートへの対応を通知してもよいものとします (MAY)。これは、フォールバックのために別の接続を使用することにより生じる追加のレイテンシなしに、このような制限のないプロトコルへのフォールバックを可能にします。</p>
 </div>
 
