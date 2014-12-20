@@ -861,7 +861,7 @@ B   C     ==>  F   B   C   ==>    F   A       OR      A
 |                        Value (32)                             |
 +---------------------------------------------------------------+
 
-                        設定フォーマット
+                       図10: 設定フォーマット
 </pre>
 
 <h4 id="section6-5-2">6.5.2. 定義済みの SETTINGS パラメーター</h4>
@@ -879,7 +879,6 @@ B   C     ==>  F   B   C   ==>    F   A       OR      A
   <dd>ストリームレベルのフロー制御のための、送信者の初期ウインドウサイズ (オクテット) を示します。初期値は 2^16-1 (65,535) です。</dd>
   <dd>この設定は、既存のストリームを含む、全てのストリームのウインドウサイズに影響します。<a href="#section6-9-2">6.9.2節</a>を参照してください。</dd>
   <dd>フロー制御ウインドウサイズの最大値である 2^31-1 を超える値は FLOW_CONTROL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません。</dd>
-
   <dt>SETTINGS_MAX_FRAME_SIZE (0x5)</dt>
   <dd>送信者が受信できるフレームペイロードのオクテット単位の最大サイズを示します。</dd>
   <dd>初期値は 2^14 (16,384) オクテットです。エンドポイントにより通知される値は、初期値と最大のフレームサイズ (2^24-1 オクテットから 16,777,215 オクテットまで) の間でなければなりません (MUST)。この範囲外の値は、PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</dd>
@@ -921,7 +920,7 @@ B   C     ==>  F   B   C   ==>    F   A       OR      A
   <dt>Header Block Fragment</dt>
   <dd>リクエストヘッダーフィールドを含むヘッダーブロックフラグメント (<a href="#section4-3">4.3節</a>) です。</dd>
   <dt>Padding</dt>
-  <dd>パディングオクテット</dd>
+  <dd>パディングオクテット。</dd>
 </dl>
 <p>PUSH_PROMISE フレームは以下のフラグを定義します:</p>
 <dl>
@@ -1179,7 +1178,7 @@ cookie: c=d
 cookie: e=f
 </pre>
 
-<h4 id="section8-1-2-6">8.1.2.6. 不正な形式のメッセージ</h4>
+<h4 id="section8-1-2-6">8.1.2.6. 不正な形式のリクエストやレスポンス</h4>
 <p>不正な形式のリクエストやレスポンスとは、有効な一連の HTTP/2 フレームである一方で、無関係なフレームや禁止されたヘッダーフィールドが存在したり、必須のヘッダーフィールドが存在しない、大文字のヘッダーフィールド名が含まれているなどの理由で無効になるものです。</p>
 <p>エンティティボディを持つリクエストやレスポンスは &quot;content-length&quot; ヘッダーフィールドを含むことができます。ボディを構成する DATA フレームペイロードの長さの合計が &quot;content-length&quot; ヘッダーフィールドの値と等しくない場合、リクエストやレスポンスは不正な形式になります。<a href="#RFC7230">[RFC7230]</a>、3.3.2節で述べられているような、ペイロードを持たないように定義されたレスポンスは、DATA フレームに内容が含まれていない場合であっても、値が0でない &quot;content-length&quot; ヘッダーフィールドを持つことができます。</p>
 <p>HTTP のリクエストやレスポンスを処理する中継者 (つまり、トンネルとして機能しない全ての中継者) は、不正な形式のリクエストやレスポンスを転送してはいけません (MUST NOT)。不正な形式のリクエストやレスポンスが検出された場合、PROTOCOL_ERROR のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) として扱わなければなりません (MUST)。</p>
@@ -1410,8 +1409,7 @@ Foo: bar                         DATA
 <p>HTTP/2 におけるパディングは、TLS <a href="#TLS12">[TLS12]</a> により提供されるような一般的なパディングの置き換えを意図していません。冗長なパディングは逆効果にもなり得ます。正しいアプリケーションであるかどうかは、パディングされたデータに関する特別な情報を持つことによって決まります。</p>
 <p>圧縮を利用した攻撃を軽減するための圧縮機能の無効化や制限は、対抗策としてのパディングよりも適しているかもしれません。</p>
 <p>パッディングはフレームの内容の正確なサイズをわかりにくくするために使用でき、HTTP の特定の攻撃を軽減するために提供されます。例えば、攻撃者により制御されたプレーンテキストと機密データを含む圧縮コンテンツにおける攻撃 (<a href="#BREACH">[BREACH]</a> の例を参照してください) があります。</p>
-<p>パディングの使用は、一見してわかる防御よりも結果的に弱い防御に終わることがあります。パディングは攻撃者が観察しなければならないフレームの数を増加させることで、長さ情報の推測をより困難にすることしかできません。不適切に実装されたパディングの構造は、簡単に破られる可能性があります。</p>
-<p>特に予測可能な分布によるランダムなパッディングは、非常にわずかな保護しか提供できません。同様に、パディングペイロードを固定サイズにすることは、ペイロードサイズをその固定サイズの境界を超えるように変更することで、情報を漏洩させます。これは攻撃者がプレーンテキストの制御が可能な場合に起こりえます。</p>
+<p>パディングの使用は、一見してわかる防御よりも結果的に弱い防御に終わることがあります。パディングは攻撃者が観察しなければならないフレームの数を増加させることで、長さ情報の推測をより困難にすることしかできません。不適切に実装されたパディングの構造は、簡単に破られる可能性があります。特に予測可能な分布によるランダムなパッディングは、非常にわずかな保護しか提供できません。同様に、パディングペイロードを固定サイズにすることは、ペイロードサイズをその固定サイズの境界を超えるように変更することで、情報を漏洩させます。これは攻撃者がプレーンテキストの制御が可能な場合に起こりえます。</p>
 <p>中継者は DATA フレームのパディングを維持すべきです (SHOUD)。しかしながら、HEADERS や PUSH_PROMISE フレームのパディングは削除してもよいものとします (MAY)。中継者がフレームのパディングの量を変更する正当な理由は、パディングが提供する保護を改善することにあります。</p>
 
 <h3 id="section10-8">10.8. プライバシーへの配慮</h3>
@@ -1632,7 +1630,6 @@ Foo: bar                         DATA
   <dd>Narten, T. and H. Alvestrand, &quot;Guidelines for Writing an IANA Considerations Section in RFCs&quot;, BCP 26, RFC 5226, May 2008.</dd>
   <dt id="RFC5234">[RFC5234]</dt>
   <dd>Crocker, D. and P. Overell, &quot;Augmented BNF for Syntax Specifications: ABNF&quot;, STD 68, RFC 5234, January 2008.</dd>
-
   <dt id="RFC7230">[RFC7230]</dt>
   <dd>Fielding, R., Ed. and J. Reschke, Ed., &quot;Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing&quot;, RFC 7230, June 2014.</dd>
   <dt id="RFC7231">[RFC7231]</dt>
@@ -1668,8 +1665,6 @@ Foo: bar                         DATA
   <dt id="HTML5">[HTML5]</dt>
   <dd>Hickson, I., Berjon, R., Faulkner, S., Leithead, T., Doyle Navara, E., O'Connor, E., and S. Pfeiffer, &quot;HTML5&quot;, W3C Recommendation REC-html5-20141028, October 2014, &lt;http://www.w3.org/TR/2014/REC-html5-20141028/&gt;.</dd>
   <dd>Latest version available at <a href="#URL5">[5]</a>.</dd>
-  <dt id="RFC1323">[RFC1323]</dt>
-  <dd>Jacobson, V., Braden, B., and D. Borman, &quot;TCP Extensions for High Performance&quot;, RFC 1323, May 1992.</dd>
   <dt id="RFC3749">[RFC3749]</dt>
   <dd>Hollenbeck, S., &quot;Transport Layer Security Protocol Compression Methods&quot;, RFC 3749, May 2004.</dd>
   <dt id="RFC4492">[RFC4492]</dt>
@@ -1992,6 +1987,7 @@ Foo: bar                         DATA
 <h3 id="since-draft-ietf-httpbis-http2-14">B.2. draft-ietf-httpbis-http2-14 からの変更</h3>
 <ul>
   <li>Not Authoritative ステータスコードを Misdirected Request に改名しました。</li>
+  <li>HTTP_1_1_REQUIRED エラーコードを追加しました。</li>
 </ul>
 
 <h3 id="since-draft-ietf-httpbis-http2-13">B.3. draft-ietf-httpbis-http2-13 からの変更</h3>
