@@ -324,7 +324,7 @@
 <p>これらの草案版に基づく非互換の試験では、&quot;-&quot; 文字と実験名を識別子に追加しなければなりません (MUST)。例えば、draft-ietf-httpbis-http2-09 に基づく Packet mood-based encoding の実装実験では、&quot;h2-09-emo&quot; として自身を識別することになります。ラベルは <a href="#RFC7230">[RFC7230]</a> の3.2.6節で定義される &quot;token&quot; 構文に従わなければなりません (MUST)。実験をするにあたっては、ietf-http-wg@w3.org メーリングリストで各実験についての調整をすることをお勧めします。</p>
 
 <h3 id="section3-2">3.2. &quot;http&quot; URI での HTTP/2 の開始</h3>
-<p>次のホップの HTTP/2 への対応に関する事前知識なしに &quot;http:&quot; URI にリクエストをするクライアントは、HTTP アップグレードメカニズムを使用します (<a href="#RFC7230">[RFC7230]</a> の6.7節)。クライアントは &quot;h2c&quot; トークンを用いて HTTP/2 を指定した Upgrade ヘッダーフィールドを含む HTTP/1.1 リクエストを送信することで、これを実行します。この HTTP/1.1 リクエストには1つの HTTP2-Settings (<a href="#section3-2-1">3.2.1節</a>) ヘッダーフィールドも含まなければなりません (MUST)。</p>
+<p>次のホップの HTTP/2 への対応に関する事前知識なしに &quot;http:&quot; URI にリクエストをするクライアントは、HTTP アップグレードメカニズムを使用します (<a href="#RFC7230">[RFC7230]</a>、6.7節)。クライアントは &quot;h2c&quot; トークンを用いて HTTP/2 を指定した Upgrade ヘッダーフィールドを含む HTTP/1.1 リクエストを送信することで、これを実行します。この HTTP/1.1 リクエストには1つの HTTP2-Settings (<a href="#section3-2-1">3.2.1節</a>) ヘッダーフィールドも含まなければなりません (MUST)。</p>
 <p>例:</p>
 <pre>GET / HTTP/1.1
 Host: server.example.com
