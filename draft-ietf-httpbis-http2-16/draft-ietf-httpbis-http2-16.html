@@ -18,7 +18,7 @@
 <dt>公開日:</dt>
 <dd class="date"><span class="published">2014-12-19</span></dd>
 <dt>更新日:</dt>
-<dd class="date"><span class="modified">2015-02-08</span></dd>
+<dd class="date"><span class="modified">2015-02-09</span></dd>
 <dt>翻訳者:</dt>
 <dd class="vcard"><span class="fn n"><span class="given-name">Moto</span> <span class="family-name">Ishizawa</span></span> &lt;<a href="mailto:summerwind.jp+spec@gmail.com" class="email">summerwind.jp@gmail.com</a>&gt;</dd>
 <dt>翻訳協力:</dt>
@@ -303,7 +303,7 @@
 <h2 id="section3">3. HTTP/2 の開始</h2>
 <p>HTTP/2 接続は TCP 接続の上で動作するアプリケーション層のプロトコルです (<a href="#TCP">[TCP]</a>)。また、クライアントが TCP 接続を開始します。</p>
 <p>HTTP/2 は、 HTTP/1.1 で使用されるのと同じ &quot;http&quot; と &quot;https&quot; の URI スキームを使用します。また、HTTP/2 は標準のポート番号も共有します: &quot;http&quot; 用の80番と、&quot;https&quot; 用の443番です。この結果、&quot;http://example.org/foo&quot; や &quot;https://example.com/bar&quot; といった対象リソース URI へのリクエストを処理する実装は、最初にアップストリームサーバー (クライアントがコネクションを確立しようとしているピア) が HTTP/2 に対応するかどうかを認識する必要があります。</p>
-<p>これは HTTP/2 への対応を決定する手段が &quot;http&quot; と &quot;https&quot; の URI で異なることを意味します。&quot;https&quot; URI のための認識は<a href="#section3-2">3.2節</a>で説明します。また、&quot;http&quot; URI のための認識は<a href="#section3-3">3.3節</a>で説明します。</p>
+<p>これは HTTP/2 への対応を決定する手段が &quot;http&quot; と &quot;https&quot; の URI で異なることを意味します。&quot;http&quot; URI のための認識は<a href="#section3-2">3.2節</a>で説明します。また、&quot;https&quot; URI のための認識は<a href="#section3-3">3.3節</a>で説明します。</p>
 
 <h3 id="section3-1">3.1. HTTP/2 のバージョン識別</h3>
 <p>この文書で定義されるプロトコルの識別子は2つあります。</p>
