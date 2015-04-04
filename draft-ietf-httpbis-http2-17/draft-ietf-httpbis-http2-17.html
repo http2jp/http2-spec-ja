@@ -1185,7 +1185,7 @@ Expires: Thu, 23 Jan ...           + END_HEADERS
                                      etag = "xyzzy"
                                      expires = Thu, 23 Jan ...
 </pre>
-<p>リクエストヘッダーフィールドとペイロードデータを含む HTTP POST リクエストは、リクエストヘッダーフィールドを含む 1つの HEADER フレームとその後に続く、0個以上の CONTINUATION フレーム、さらにその後に続く1つ以上の DATA フレームとして転送されます。最後の CONTINUATION　(または HEADERS) フレームには、END_HEADERS フラグが設定され、最後の DATA フレームには END_STREAM フラグが設定されます。</p>
+<p>リクエストヘッダーフィールドとペイロードデータを含む HTTP POST リクエストは、リクエストヘッダーフィールドを含む 1つの HEADERS フレームとその後に続く、0個以上の CONTINUATION フレーム、さらにその後に続く1つ以上の DATA フレームとして転送されます。最後の CONTINUATION　(または HEADERS) フレームには、END_HEADERS フラグが設定され、最後の DATA フレームには END_STREAM フラグが設定されます。</p>
 <pre>POST /resource HTTP/1.1          HEADERS
 Host: example.org          ==>     - END_STREAM
 Content-Type: image/jpeg           - END_HEADERS
