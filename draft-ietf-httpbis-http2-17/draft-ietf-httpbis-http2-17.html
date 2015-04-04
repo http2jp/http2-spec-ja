@@ -504,7 +504,7 @@ Upgrade: h2c
     <p>全てのストリームは &quot;idle&quot; 状態からはじまります。</p>
     <p>この状態では、次のような遷移が有効です:</p>
     <ul>
-      <li>HEADER フレームの送信や受信は、ストリームを &quot;open&quot; 状態にします。<a href="#section5-1-1">5.1.1節</a>で説明されるようにストリームIDが選択されます。同一の HEADERS フレームはストリームをすぐに &quot;half closed&quot; にする可能性があります。</li>
+      <li>HEADERS フレームの送信や受信は、ストリームを &quot;open&quot; 状態にします。<a href="#section5-1-1">5.1.1節</a>で説明されるようにストリームIDが選択されます。同一の HEADERS フレームはストリームをすぐに &quot;half closed&quot; にする可能性があります。</li>
       <li>異なるストリームにおける PUSH_PROMISE フレームの送信は、今後使用する idle ストリームを予約します。予約済みストリームの状態は &quot;reserved (local)&quot; に遷移します。</li>
       <li>異なるストリームにおける PUSH_PROMISE フレームの受信は、今後使用する idle ストリームを予約します。予約済みストリームの状態は &quot;reserved (remote)&quot; に遷移します。</li>
       <li>PUSH_PROMISE フレームは idle ストリームには送信されませんが、Promised Stream ID フィールドの新しい予約ストリームとして参照されることに注意してください。</li>
