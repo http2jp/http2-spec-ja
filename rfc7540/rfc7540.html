@@ -17,7 +17,7 @@
 <dt>公開日:</dt>
 <dd class="date"><span class="published">2015-05-17</span></dd>
 <dt>更新日:</dt>
-<dd class="date"><span class="modified">2015-05-17</span></dd>
+<dd class="date"><span class="modified">2015-05-20</span></dd>
 <dt>翻訳者:</dt>
 <dd class="vcard"><span class="fn n"><span class="given-name">Moto</span> <span class="family-name">Ishizawa</span></span> &lt;<a href="mailto:summerwind.jp+spec@gmail.com" class="email">summerwind.jp@gmail.com</a>&gt;</dd>
 <dt>翻訳協力:</dt>
@@ -337,7 +337,7 @@ Upgrade: h2c
 
 <h3 id="section3-4">3.4. 事前知識による HTTP/2 の開始</h3>
 <p>クライアントは、他の方法で特定のサーバーが HTTP/2 に対応していることを知ることができます。例えば、<a href="#ALT-SVC">[ALT-SVC]</a> では対応状況を通知するメカニズムを説明しています。</p>
-<p>そのようなサーバーに対し、クライアントはコネクションプリフェイス (<a href="#section3-5">3.5節</a>) を送信しなければなりません (MSUT)。また、続いて直ちに HTTP/2 フレームを送信してもよいものとします (MAY)。サーバーはコネクションプリフェイスの存在により、このような接続を識別できます。これは平文 TCP 上の HTTP/2 接続の確立にのみ影響し、TLS 上の HTTP/2 に対応する実装は、TLS のプロトコルネゴシエーション [<a href="#TLS-ALPN">[TLS-ALPN]</a>] を使用しなければなりません (MUST)。</p>
+<p>そのようなサーバーに対し、クライアントはコネクションプリフェイス (<a href="#section3-5">3.5節</a>) を送信しなければなりません (MUST)。また、続いて直ちに HTTP/2 フレームを送信してもよいものとします (MAY)。サーバーはコネクションプリフェイスの存在により、このような接続を識別できます。これは平文 TCP 上の HTTP/2 接続の確立にのみ影響し、TLS 上の HTTP/2 に対応する実装は、TLS のプロトコルネゴシエーション [<a href="#TLS-ALPN">[TLS-ALPN]</a>] を使用しなければなりません (MUST)。</p>
 <p>同様に、サーバーもコネクションプリフェイス (<a href="#section3-5">3.5節</a>) を送信しなければなりません (MUST)。</p>
 <p>追加情報がない、事前知識による HTTP/2 接続は、今後のコネクションに対しても指定されたサーバーが HTTP/2 に対応するという強いシグナルではありません。例えば、サーバーの設定の変更や、クラスター化されたサーバーインスタンス間で異なる設定をする、ネットワーク状況を変更するといったことは可能です。</p>
 
