@@ -708,7 +708,7 @@ B   C     ==>  F   B   C   ==>    F   A       OR      A
 </dl>
 <p>DATA フレームはストリームに関連付けられなければなりません (MUST)。Stream Identifier フィールドが 0x0 の DATA フレームを受信した場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) で応答しなければなりません (MUST)。</p>
 <p>DATA フレームはフロー制御の対象となり、ストリームが &quot;open&quot; または &quot;half-closed (remote)&quot; 状態の問にのみ送信できます。Pad Length や Padding フィールドが存在する場合は、それらを含む DATA フレームのペイロードの全てが、フロー制御に含まれます。&quot;open&quot; または &quot;half-closed (local)&quot; 状態にないストリームから DATA フレームを受信した場合は、受信者は STREAM_CLOSED のストリームエラー (<a href="#section5-4-2">5.4.2節</a>) で応答しなければなりません (MUST)。</p>
-<p>パディングオクテットの合計は、Pad Length フィールドの値により決定されます。パディングの長さが、フレームペイロードの長さよりも大きい場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
+<p>パディングオクテットの合計は、Pad Length フィールドの値により決定されます。パディングの長さが、フレームペイロードの長さと同じかそれよりも大きい場合、受信者は PROTOCOL_ERROR のコネクションエラー (<a href="#section5-4-1">5.4.1節</a>) として扱わなければなりません (MUST)。</p>
 <p class="note">注: 値が0の Pad Length フィールドを含めることで、フレームを1オクテット大きくできます。</p>
 
 <h3 id="section6-2">6.2. HEADERS</h3>
