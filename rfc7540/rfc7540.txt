@@ -1393,10 +1393,10 @@ Trailing ヘッダーフィールドは、リクエストやレスポンスヘ�
 
 以下の例は、Expect ヘッダーフィールドに "100-continue" トークンを含むリクエストに対するレスポンスとして送信される 100 (Continue) ステータスコードと Trailing ヘッダーフィールドの両方を含む例です。
 
-     HTTP/1.1 103 BAR                 HEADERS
+     HTTP/1.1 100 Continue            HEADERS
      Extension-Field: bar       ==>     - END_STREAM
                                         + END_HEADERS
-                                          :status = 103
+                                          :status = 100
                                           extension-field = bar
 
      HTTP/1.1 200 OK                  HEADERS
@@ -1414,7 +1414,7 @@ Trailing ヘッダーフィールドは、リクエストやレスポンスヘ�
                                       HEADERS
                                         + END_STREAM
                                         + END_HEADERS
-                                          foo: bar
+                                          foo = bar
 
 8.1.4. HTTP/2 におけるリクエストの信頼性向上メカニズム
 
