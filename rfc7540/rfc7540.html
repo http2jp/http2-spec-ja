@@ -1188,10 +1188,10 @@ Content-Length: 123              + END_HEADERS
 <p>101 以外の 1xx ステータスコードを使用する情報提供レスポンスは HEADERS フレームとそれに続く0個以上の CONTINUATION フレームとして転送されます。</p>
 <p>Trailing ヘッダーフィールドは、リクエストやレスポンスヘッダーブロックと、全ての DATA フレームが送信された後に、ヘッダーブロックとして送信されます。トレイラーヘッダーブロックを開始する HEADERS フレームには END_STREAM フラグが設定されます。</p>
 <p>以下の例は、Expect ヘッダーフィールドに &quot;100-continue&quot; トークンを含むリクエストに対するレスポンスとして送信される 100 (Continue) ステータスコードと Trailing ヘッダーフィールドの両方を含む例です。</p>
-<pre>HTTP/1.1 103 BAR                 HEADERS
+<pre>HTTP/1.1 100 Continue            HEADERS
 Extension-Field: bar       ==>     - END_STREAM
                                    + END_HEADERS
-                                     :status = 103
+                                     :status = 100
                                      extension-field = bar
 
 HTTP/1.1 200 OK                  HEADERS
@@ -1209,7 +1209,7 @@ Foo: bar                         DATA
                                  HEADERS
                                    + END_STREAM
                                    + END_HEADERS
-                                     foo: bar
+                                     foo = bar
 </pre>
 
 <h4 id="section8-1-4">8.1.4. HTTP/2 におけるリクエストの信頼性向上メカニズム</h4>
